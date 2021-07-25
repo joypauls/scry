@@ -3,6 +3,7 @@ package main
 // inspired by https://github.com/nsf/termbox-go/blob/master/_demos/editbox.go
 
 import (
+	"strconv"
 	"unicode/utf8"
 
 	"github.com/mattn/go-runewidth"
@@ -238,6 +239,56 @@ var edit_box EditBox
 
 const edit_box_width = 30
 
+const grid_width = 3 // not character width, grid cell width
+const grid_cell_width = 1
+
+func draw_box_outline(x_start int, y_start int, coldef termbox.Attribute) {
+	termbox.SetCell(x_start-1, y_start, '│', coldef, coldef)
+	termbox.SetCell(x_start+edit_box_width, y_start, '│', coldef, coldef)
+	termbox.SetCell(x_start-1, y_start-1, '┌', coldef, coldef)
+	termbox.SetCell(x_start-1, y_start+1, '└', coldef, coldef)
+	termbox.SetCell(x_start+edit_box_width, y_start-1, '┐', coldef, coldef)
+	termbox.SetCell(x_start+edit_box_width, y_start+1, '┘', coldef, coldef)
+	fill(x_start, y_start-1, edit_box_width, 1, termbox.Cell{Ch: '─'})
+	fill(x_start, y_start+1, edit_box_width, 1, termbox.Cell{Ch: '─'})
+}
+
+func draw_test_grid(x_start int, y_start int, coldef termbox.Attribute) {
+	// termbox.SetCell(x_start, y_start, '│', coldef, coldef)
+	for i := 0; i < grid_width; i++ {
+		// iterate across x axis
+		termbox.SetCell(x_start+i, y_start, 'O', coldef, coldef)
+		// termbox.SetCell(x_start, y_start, '│', coldef, coldef)
+	}
+}
+
+var x_marker int = 1
+var y_marker int = 1
+
+func min_int(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max_int(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func move_marker(x_change int, y_change int) {
+	_start := 1
+	x_marker = min_int(max_int(x_marker+x_change, _start), _start+grid_width-1)
+	y_marker = 1
+}
+
+func place_marker(x_start int, y_start int, coldef termbox.Attribute) {
+	termbox.SetCell(x_start, y_start, 'X', coldef, coldef)
+}
+
 func redraw_all() {
 	const coldef = termbox.ColorDefault
 	termbox.Clear(coldef, coldef)
@@ -247,37 +298,45 @@ func redraw_all() {
 	_, h := termbox.Size()
 	// using offset +1 at corner (0+1) for niceness
 	// midy := h / 2
-	midy := 1
+	y_start := 1
 	// midx := (w - edit_box_width) / 2
-	midx := 1
-	bottom_y := h - 1
+	x_start := 1
+	y_end := h - 1
+
+	// set marker initial state
 
 	// unicode box drawing chars around the edit box
-	if runewidth.EastAsianWidth {
-		termbox.SetCell(midx-1, midy, '|', coldef, coldef)
-		termbox.SetCell(midx+edit_box_width, midy, '|', coldef, coldef)
-		termbox.SetCell(midx-1, midy-1, '+', coldef, coldef)
-		termbox.SetCell(midx-1, midy+1, '+', coldef, coldef)
-		termbox.SetCell(midx+edit_box_width, midy-1, '+', coldef, coldef)
-		termbox.SetCell(midx+edit_box_width, midy+1, '+', coldef, coldef)
-		fill(midx, midy-1, edit_box_width, 1, termbox.Cell{Ch: '-'})
-		fill(midx, midy+1, edit_box_width, 1, termbox.Cell{Ch: '-'})
-	} else {
-		termbox.SetCell(midx-1, midy, '│', coldef, coldef)
-		termbox.SetCell(midx+edit_box_width, midy, '│', coldef, coldef)
-		termbox.SetCell(midx-1, midy-1, '┌', coldef, coldef)
-		termbox.SetCell(midx-1, midy+1, '└', coldef, coldef)
-		termbox.SetCell(midx+edit_box_width, midy-1, '┐', coldef, coldef)
-		termbox.SetCell(midx+edit_box_width, midy+1, '┘', coldef, coldef)
-		fill(midx, midy-1, edit_box_width, 1, termbox.Cell{Ch: '─'})
-		fill(midx, midy+1, edit_box_width, 1, termbox.Cell{Ch: '─'})
-	}
+	// draw_box_outline(x_start, y_start, coldef)
+	draw_test_grid(x_start, y_start, coldef)
 
-	edit_box.Draw(midx, midy, edit_box_width, 1)
-	termbox.SetCursor(midx+edit_box.CursorX(), midy)
+	// if runewidth.EastAsianWidth {
+	// 	termbox.SetCell(midx-1, midy, '|', coldef, coldef)
+	// 	termbox.SetCell(midx+edit_box_width, midy, '|', coldef, coldef)
+	// 	termbox.SetCell(midx-1, midy-1, '+', coldef, coldef)
+	// 	termbox.SetCell(midx-1, midy+1, '+', coldef, coldef)
+	// 	termbox.SetCell(midx+edit_box_width, midy-1, '+', coldef, coldef)
+	// 	termbox.SetCell(midx+edit_box_width, midy+1, '+', coldef, coldef)
+	// 	fill(midx, midy-1, edit_box_width, 1, termbox.Cell{Ch: '-'})
+	// 	fill(midx, midy+1, edit_box_width, 1, termbox.Cell{Ch: '-'})
+	// } else {
+	// 	termbox.SetCell(midx-1, midy, '│', coldef, coldef)
+	// 	termbox.SetCell(midx+edit_box_width, midy, '│', coldef, coldef)
+	// 	termbox.SetCell(midx-1, midy-1, '┌', coldef, coldef)
+	// 	termbox.SetCell(midx-1, midy+1, '└', coldef, coldef)
+	// 	termbox.SetCell(midx+edit_box_width, midy-1, '┐', coldef, coldef)
+	// 	termbox.SetCell(midx+edit_box_width, midy+1, '┘', coldef, coldef)
+	// 	fill(midx, midy-1, edit_box_width, 1, termbox.Cell{Ch: '─'})
+	// 	fill(midx, midy+1, edit_box_width, 1, termbox.Cell{Ch: '─'})
+	// }
 
-	// print at
-	tbprint(midx-1, bottom_y, coldef, coldef, "Press: ESC (quit), h (help)")
+	// draw the dynamic content dependent on user input
+	// edit_box.Draw(x_start, y_start, edit_box_width, 1)
+	place_marker(x_marker, y_marker, coldef)
+	// termbox.SetCursor(x_start+edit_box.CursorX(), y_start)
+
+	// print at bottom of box
+	tbprint(x_start-1, y_end-5, coldef, coldef, strconv.Itoa(x_marker))
+	tbprint(x_start-1, y_end, coldef, coldef, "Press: ESC/CTRL+c (quit), h (help)")
 	termbox.Flush()
 }
 
@@ -305,26 +364,28 @@ mainloop:
 		switch ev := termbox.PollEvent(); ev.Type {
 		case termbox.EventKey:
 			switch ev.Key {
-			case termbox.KeyEsc:
+			case termbox.KeyEsc, termbox.KeyCtrlC:
 				break mainloop
 			case termbox.KeyArrowLeft, termbox.KeyCtrlB:
-				edit_box.MoveCursorOneRuneBackward()
+				// edit_box.MoveCursorOneRuneBackward()
+				move_marker(-1, 0)
 			case termbox.KeyArrowRight, termbox.KeyCtrlF:
-				edit_box.MoveCursorOneRuneForward()
-			case termbox.KeyBackspace, termbox.KeyBackspace2:
-				edit_box.DeleteRuneBackward()
-			case termbox.KeyDelete, termbox.KeyCtrlD:
-				edit_box.DeleteRuneForward()
-			case termbox.KeyTab:
-				edit_box.InsertRune('\t')
-			case termbox.KeySpace:
-				edit_box.InsertRune(' ')
-			case termbox.KeyCtrlK:
-				edit_box.DeleteTheRestOfTheLine()
-			case termbox.KeyHome, termbox.KeyCtrlA:
-				edit_box.MoveCursorToBeginningOfTheLine()
-			case termbox.KeyEnd, termbox.KeyCtrlE:
-				edit_box.MoveCursorToEndOfTheLine()
+				// edit_box.MoveCursorOneRuneForward()
+				move_marker(1, 0)
+			// case termbox.KeyBackspace, termbox.KeyBackspace2:
+			// 	edit_box.DeleteRuneBackward()
+			// case termbox.KeyDelete, termbox.KeyCtrlD:
+			// 	edit_box.DeleteRuneForward()
+			// case termbox.KeyTab:
+			// 	edit_box.InsertRune('\t')
+			// case termbox.KeySpace:
+			// 	edit_box.InsertRune(' ')
+			// case termbox.KeyCtrlK:
+			// 	edit_box.DeleteTheRestOfTheLine()
+			// case termbox.KeyHome, termbox.KeyCtrlA:
+			// 	edit_box.MoveCursorToBeginningOfTheLine()
+			// case termbox.KeyEnd, termbox.KeyCtrlE:
+			// 	edit_box.MoveCursorToEndOfTheLine()
 			default:
 				if ev.Ch != 0 {
 					edit_box.InsertRune(ev.Ch)

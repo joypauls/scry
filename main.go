@@ -1,15 +1,15 @@
 package main
 
 import (
-    "fmt"
-    "os"
-    "log"
+	"fmt"
+	"log"
+	"os"
 )
 
 func parseCurDir() string {
 	path, err := os.Getwd()
 	if err != nil {
-    	log.Println(err)
+		log.Println(err)
 	}
 	return path
 }
@@ -39,7 +39,7 @@ func main() {
 		fileName = file.Name()
 		isDir = file.IsDir()
 
-		fmt.Println(fileName + ", " + parseDir(isDir))
+		// fmt.Println(fileName + ", " + parseDir(isDir))
+		fmt.Printf("|%-6s|%s|\n", parseDir(isDir), fileName)
 	}
 }
-

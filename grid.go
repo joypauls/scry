@@ -1,3 +1,4 @@
+// This package is handling the printing, terminal functionality, and user input.
 package main
 
 // inspired by https://github.com/nsf/termbox-go/blob/master/_demos/editbox.go
@@ -10,8 +11,9 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
-func tbprint(x, y int, fg, bg termbox.Attribute, msg string) {
-	for _, c := range msg {
+// Uses termbox specific functionality to display a string in cells.
+func termbox_print(x, y int, fg, bg termbox.Attribute, s string) {
+	for _, c := range s {
 		termbox.SetCell(x, y, c, fg, bg)
 		x += runewidth.RuneWidth(c)
 	}
@@ -231,39 +233,51 @@ func (eb *EditBox) CursorX() int {
 	return eb.cursor_voffset - eb.line_voffset
 }
 
-///////////////
-// Main Program
-///////////////
+////////////////////
+// State Tracking //
+////////////////////
+
+//////////////////
+// Main Program //
+//////////////////
 
 var edit_box EditBox
 
 const edit_box_width = 30
 
-const grid_width = 3 // not character width, grid cell width
-const grid_cell_width = 1
+const grid_cols = 5 // not character width, grid cell width
+const grid_rows = 3
+const grid_cell_width = 2
 
-func draw_box_outline(x_start int, y_start int, coldef termbox.Attribute) {
-	termbox.SetCell(x_start-1, y_start, '│', coldef, coldef)
-	termbox.SetCell(x_start+edit_box_width, y_start, '│', coldef, coldef)
-	termbox.SetCell(x_start-1, y_start-1, '┌', coldef, coldef)
-	termbox.SetCell(x_start-1, y_start+1, '└', coldef, coldef)
-	termbox.SetCell(x_start+edit_box_width, y_start-1, '┐', coldef, coldef)
-	termbox.SetCell(x_start+edit_box_width, y_start+1, '┘', coldef, coldef)
-	fill(x_start, y_start-1, edit_box_width, 1, termbox.Cell{Ch: '─'})
-	fill(x_start, y_start+1, edit_box_width, 1, termbox.Cell{Ch: '─'})
-}
+// func draw_box_outline(x_start int, y_start int, coldef termbox.Attribute) {
+// 	termbox.SetCell(x_start-1, y_start, '│', coldef, coldef)
+// 	termbox.SetCell(x_start+edit_box_width, y_start, '│', coldef, coldef)
+// 	termbox.SetCell(x_start-1, y_start-1, '┌', coldef, coldef)
+// 	termbox.SetCell(x_start-1, y_start+1, '└', coldef, coldef)
+// 	termbox.SetCell(x_start+edit_box_width, y_start-1, '┐', coldef, coldef)
+// 	termbox.SetCell(x_start+edit_box_width, y_start+1, '┘', coldef, coldef)
+// 	fill(x_start, y_start-1, edit_box_width, 1, termbox.Cell{Ch: '─'})
+// 	fill(x_start, y_start+1, edit_box_width, 1, termbox.Cell{Ch: '─'})
+// }
 
+// left oriented
 func draw_test_grid(x_start int, y_start int, coldef termbox.Attribute) {
 	// termbox.SetCell(x_start, y_start, '│', coldef, coldef)
-	for i := 0; i < grid_width; i++ {
-		// iterate across x axis
-		termbox.SetCell(x_start+i, y_start, 'O', coldef, coldef)
-		// termbox.SetCell(x_start, y_start, '│', coldef, coldef)
+	for i := 0; i < grid_rows; i++ {
+		for j := 0; j < grid_cols; j++ {
+			// iterate across x axis
+			left_side := (grid_cell_width * j) + x_start
+			termbox.SetCell(left_side, y_start+i, 'O', coldef, coldef)
+			termbox.SetCell(left_side+1, y_start+i, ' ', coldef, coldef)
+		}
 	}
 }
 
 var x_marker int = 1
 var y_marker int = 1
+
+var x_start int = 1
+var y_start int = 1
 
 func min_int(a, b int) int {
 	if a < b {
@@ -279,14 +293,22 @@ func max_int(a, b int) int {
 	return b
 }
 
+// This should move the marker in the *backing data structure*.
+// These coordinates need not reflect the termbox cells displayed.
 func move_marker(x_change int, y_change int) {
-	_start := 1
-	x_marker = min_int(max_int(x_marker+x_change, _start), _start+grid_width-1)
-	y_marker = 1
+	x_marker = min_int(max_int(x_marker+x_change, x_start), grid_cols)
+	y_marker = min_int(max_int(y_marker+y_change, y_start), grid_rows)
 }
 
-func place_marker(x_start int, y_start int, coldef termbox.Attribute) {
-	termbox.SetCell(x_start, y_start, 'X', coldef, coldef)
+// pass virtual coordinates, and place in termbox space
+func place_marker(x int, y int, coldef termbox.Attribute) {
+	termbox.SetCell(
+		(x-1)*grid_cell_width+x_start,
+		(y-1)+y_start,
+		'X',
+		coldef,
+		coldef,
+	)
 }
 
 func redraw_all() {
@@ -298,9 +320,6 @@ func redraw_all() {
 	_, h := termbox.Size()
 	// using offset +1 at corner (0+1) for niceness
 	// midy := h / 2
-	y_start := 1
-	// midx := (w - edit_box_width) / 2
-	x_start := 1
 	y_end := h - 1
 
 	// set marker initial state
@@ -335,8 +354,9 @@ func redraw_all() {
 	// termbox.SetCursor(x_start+edit_box.CursorX(), y_start)
 
 	// print at bottom of box
-	tbprint(x_start-1, y_end-5, coldef, coldef, strconv.Itoa(x_marker))
-	tbprint(x_start-1, y_end, coldef, coldef, "Press: ESC/CTRL+c (quit), h (help)")
+	coords_str := "(" + strconv.Itoa(x_marker) + "," + strconv.Itoa(y_marker) + ")"
+	termbox_print(x_start-1, y_end-5, coldef, coldef, coords_str)
+	termbox_print(x_start-1, y_end, coldef, coldef, "Press: ESC/CTRL+c (quit), h (help)")
 	termbox.Flush()
 }
 
@@ -372,6 +392,10 @@ mainloop:
 			case termbox.KeyArrowRight, termbox.KeyCtrlF:
 				// edit_box.MoveCursorOneRuneForward()
 				move_marker(1, 0)
+			case termbox.KeyArrowDown:
+				move_marker(0, 1)
+			case termbox.KeyArrowUp:
+				move_marker(0, -1)
 			// case termbox.KeyBackspace, termbox.KeyBackspace2:
 			// 	edit_box.DeleteRuneBackward()
 			// case termbox.KeyDelete, termbox.KeyCtrlD:

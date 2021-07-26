@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"unicode/utf8"
 
+	"github.com/joypauls/file-scry/filetools"
 	"github.com/mattn/go-runewidth"
 	"github.com/nsf/termbox-go"
 )
@@ -247,10 +248,19 @@ const edit_box_width = 30
 
 const grid_cols = 5 // not character width, grid cell width
 const grid_rows = 5
-const grid_cell_width = 5
+const grid_cell_width = 7
+
+var files [grid_rows]string
+
+func fillWithJunk(files []string) {
+	for i := 0; i < grid_rows; i++ {
+		files[i] = fmt.Sprintf("file%d", i)
+	}
+}
 
 // left oriented
 func draw_test_grid(x_start int, y_start int, coldef termbox.Attribute) {
+	fillWithJunk(files[:])
 	// termbox.SetCell(x_start, y_start, '│', coldef, coldef)
 	for i := 0; i < grid_rows; i++ {
 		for j := 0; j < grid_cols; j++ {
@@ -258,7 +268,11 @@ func draw_test_grid(x_start int, y_start int, coldef termbox.Attribute) {
 			left_side := (grid_cell_width * j) + x_start
 			// termbox.SetCell(left_side, y_start+i, 'O', coldef, coldef)
 			formatter := fmt.Sprintf("%%-%ds", grid_cell_width)
-			termbox_print(left_side, y_start+i, coldef, coldef, fmt.Sprintf(formatter, "0"))
+			if j == grid_cols-1 {
+				termbox_print(left_side, y_start+i, coldef, coldef, fmt.Sprintf(formatter, files[i]))
+			} else {
+				termbox_print(left_side, y_start+i, coldef, coldef, fmt.Sprintf(formatter, "0"))
+			}
 		}
 	}
 }
@@ -268,8 +282,21 @@ var x_marker int = 1
 var y_marker int = 1
 
 // starting upper left corner of canvas
-var x_start int = 1
-var y_start int = 1
+var x_start int = 0
+var y_start int = 0
+
+var xGridStart int = 0
+var yGridStart int = 2
+
+var arrowLeft = '←'
+var arrowRight = '→'
+
+func init() {
+	if runewidth.EastAsianWidth {
+		arrowLeft = '<'
+		arrowRight = '>'
+	}
+}
 
 func min_int(a, b int) int {
 	if a < b {
@@ -288,19 +315,30 @@ func max_int(a, b int) int {
 // This should move the marker in the *backing data structure*.
 // These coordinates need not reflect the termbox cells displayed.
 func move_marker(x_change int, y_change int) {
-	x_marker = min_int(max_int(x_marker+x_change, x_start), grid_cols)
-	y_marker = min_int(max_int(y_marker+y_change, y_start), grid_rows)
+	x_marker = min_int(max_int(x_marker+x_change, 1), grid_cols)
+	y_marker = min_int(max_int(y_marker+y_change, 1), grid_rows)
 }
 
 // pass virtual coordinates, and place in termbox space
 func place_marker(x int, y int, coldef termbox.Attribute) {
-	termbox.SetCell(
-		(x-1)*grid_cell_width+x_start,
-		(y-1)+y_start,
-		'X',
-		coldef,
-		coldef,
-	)
+	if x == grid_cols {
+		formatter := fmt.Sprintf("%c %%-%ds", arrowRight, grid_cell_width)
+		termbox_print(
+			(x-1)*grid_cell_width+xGridStart,
+			(y-1)+yGridStart,
+			coldef,
+			coldef,
+			fmt.Sprintf(formatter, files[y-1]),
+		)
+	} else {
+		termbox.SetCell(
+			(x-1)*grid_cell_width+xGridStart,
+			(y-1)+yGridStart,
+			'X',
+			coldef,
+			coldef,
+		)
+	}
 }
 
 // Handles drawing on the screen, hydrating grid with current state.
@@ -315,29 +353,23 @@ func redraw() {
 	y_end := height - 1
 
 	// unicode box drawing chars around the edit box
-	draw_test_grid(x_start, y_start, coldef)
+	draw_test_grid(xGridStart, yGridStart, coldef)
 
 	// draw the dynamic content dependent on user input
 	// edit_box.Draw(x_start, y_start, edit_box_width, 1)
 	place_marker(x_marker, y_marker, coldef)
-	// termbox.SetCursor(x_start+edit_box.CursorX(), y_start)
 
-	// print at bottom of box
-	// coords_str := "(" + strconv.Itoa(x_marker) + "," + strconv.Itoa(y_marker) + ")"
-	coords_str := fmt.Sprintf("(%d,%d)", x_marker, y_marker)
-	termbox_print(x_end-len(coords_str), y_end, coldef, coldef, coords_str)
-	termbox_print(x_start-1, y_end, coldef, coldef, "Press: ESC/CTRL+c (quit), h (help)")
+	// draw top menu bar
+	curDir := filetools.ParseCurDir()
+	termbox_print(x_start, y_start, coldef, coldef, curDir)
+
+	// draw bottom menu bar
+	coordStr := fmt.Sprintf("(%d,%d)", x_marker, y_marker)
+	termbox_print(x_end-len(coordStr)+1, y_end, coldef, coldef, coordStr)
+	termbox_print(xGridStart, y_end, coldef, coldef, "Press: ESC/CTRL+c (quit), h (help)")
+
+	// cleanup
 	termbox.Flush()
-}
-
-var arrowLeft = '←'
-var arrowRight = '→'
-
-func init() {
-	if runewidth.EastAsianWidth {
-		arrowLeft = '<'
-		arrowRight = '>'
-	}
 }
 
 func main() {

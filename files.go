@@ -87,4 +87,7 @@ func main() {
 	fmt.Printf("%.1f\n", math.Mod(1433.023, 1000))
 	fmt.Println(1433 / 1000) // integer division truncates
 	fmt.Println(humanizeBytes(1433))
+	formatter := fmt.Sprintf("%%-%ds", 3)
+	fmt.Println(formatter)
+	fmt.Println(fmt.Sprintf(formatter, "O"))
 }

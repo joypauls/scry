@@ -13,7 +13,7 @@ import (
 )
 
 // Uses termbox specific functionality to display a string in cells.
-func termbox_print(x, y int, fg, bg termbox.Attribute, s string) {
+func termboxPrint(x, y int, fg, bg termbox.Attribute, s string) {
 	for _, c := range s {
 		termbox.SetCell(x, y, c, fg, bg)
 		x += runewidth.RuneWidth(c)
@@ -269,9 +269,9 @@ func draw_test_grid(x_start int, y_start int, coldef termbox.Attribute) {
 			// termbox.SetCell(left_side, y_start+i, 'O', coldef, coldef)
 			formatter := fmt.Sprintf("%%-%ds", grid_cell_width)
 			if j == grid_cols-1 {
-				termbox_print(left_side, y_start+i, coldef, coldef, fmt.Sprintf(formatter, files[i]))
+				termboxPrint(left_side, y_start+i, coldef, coldef, fmt.Sprintf(formatter, files[i]))
 			} else {
-				termbox_print(left_side, y_start+i, coldef, coldef, fmt.Sprintf(formatter, "0"))
+				termboxPrint(left_side, y_start+i, coldef, coldef, fmt.Sprintf(formatter, "0"))
 			}
 		}
 	}
@@ -323,7 +323,7 @@ func move_marker(x_change int, y_change int) {
 func place_marker(x int, y int, coldef termbox.Attribute) {
 	if x == grid_cols {
 		formatter := fmt.Sprintf("%c %%-%ds", arrowRight, grid_cell_width)
-		termbox_print(
+		termboxPrint(
 			(x-1)*grid_cell_width+xGridStart,
 			(y-1)+yGridStart,
 			coldef,
@@ -361,12 +361,12 @@ func redraw() {
 
 	// draw top menu bar
 	curDir := filetools.ParseCurDir()
-	termbox_print(x_start, y_start, coldef, coldef, curDir)
+	termboxPrint(x_start, y_start, coldef, coldef, curDir)
 
 	// draw bottom menu bar
 	coordStr := fmt.Sprintf("(%d,%d)", x_marker, y_marker)
-	termbox_print(x_end-len(coordStr)+1, y_end, coldef, coldef, coordStr)
-	termbox_print(xGridStart, y_end, coldef, coldef, "Press: ESC/CTRL+c (quit), h (help)")
+	termboxPrint(x_end-len(coordStr)+1, y_end, coldef, coldef, coordStr)
+	termboxPrint(xGridStart, y_end, coldef, coldef, "Press: ESC/CTRL+c (quit), h (help)")
 
 	// cleanup
 	termbox.Flush()

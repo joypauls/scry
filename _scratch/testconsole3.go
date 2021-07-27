@@ -1,20 +1,16 @@
-// This package is handling the printing, terminal functionality, and user input.
 package main
 
-// inspired by https://github.com/nsf/termbox-go/blob/master/_demos/editbox.go
+// https://github.com/nsf/termbox-go/blob/master/_demos/editbox.go
 
 import (
-	"fmt"
 	"unicode/utf8"
 
-	ft "github.com/joypauls/file-scry/filetools"
 	"github.com/mattn/go-runewidth"
 	"github.com/nsf/termbox-go"
 )
 
-// Uses termbox specific functionality to display a string in cells.
-func termboxPrint(x, y int, fg, bg termbox.Attribute, s string) {
-	for _, c := range s {
+func tbprint(x, y int, fg, bg termbox.Attribute, msg string) {
+	for _, c := range msg {
 		termbox.SetCell(x, y, c, fg, bg)
 		x += runewidth.RuneWidth(c)
 	}
@@ -183,10 +179,9 @@ func (eb *EditBox) MoveCursorOneRuneBackward() {
 }
 
 func (eb *EditBox) MoveCursorOneRuneForward() {
-	// remove this to do something
-	// if eb.cursor_boffset == len(eb.text) {
-	// 	return
-	// }
+	if eb.cursor_boffset == len(eb.text) {
+		return
+	}
 	_, size := eb.RuneUnderCursor()
 	eb.MoveCursorTo(eb.cursor_boffset + size)
 }
@@ -234,59 +229,45 @@ func (eb *EditBox) CursorX() int {
 	return eb.cursor_voffset - eb.line_voffset
 }
 
-////////////////////
-// State Tracking //
-////////////////////
-
-//////////////////
-// Main Program //
-//////////////////
-
 var edit_box EditBox
 
 const edit_box_width = 30
 
-const grid_cols = 5 // not character width, grid cell width
-const grid_rows = 5
-const grid_cell_width = 7
+func redraw_all() {
+	const coldef = termbox.ColorDefault
+	termbox.Clear(coldef, coldef)
+	w, h := termbox.Size()
 
-var files [grid_rows]string
+	midy := h / 2
+	midx := (w - edit_box_width) / 2
 
-func fillWithJunk(files []string) {
-	for i := 0; i < grid_rows; i++ {
-		files[i] = fmt.Sprintf("file%d", i)
+	// unicode box drawing chars around the edit box
+	if runewidth.EastAsianWidth {
+		termbox.SetCell(midx-1, midy, '|', coldef, coldef)
+		termbox.SetCell(midx+edit_box_width, midy, '|', coldef, coldef)
+		termbox.SetCell(midx-1, midy-1, '+', coldef, coldef)
+		termbox.SetCell(midx-1, midy+1, '+', coldef, coldef)
+		termbox.SetCell(midx+edit_box_width, midy-1, '+', coldef, coldef)
+		termbox.SetCell(midx+edit_box_width, midy+1, '+', coldef, coldef)
+		fill(midx, midy-1, edit_box_width, 1, termbox.Cell{Ch: '-'})
+		fill(midx, midy+1, edit_box_width, 1, termbox.Cell{Ch: '-'})
+	} else {
+		termbox.SetCell(midx-1, midy, '│', coldef, coldef)
+		termbox.SetCell(midx+edit_box_width, midy, '│', coldef, coldef)
+		termbox.SetCell(midx-1, midy-1, '┌', coldef, coldef)
+		termbox.SetCell(midx-1, midy+1, '└', coldef, coldef)
+		termbox.SetCell(midx+edit_box_width, midy-1, '┐', coldef, coldef)
+		termbox.SetCell(midx+edit_box_width, midy+1, '┘', coldef, coldef)
+		fill(midx, midy-1, edit_box_width, 1, termbox.Cell{Ch: '─'})
+		fill(midx, midy+1, edit_box_width, 1, termbox.Cell{Ch: '─'})
 	}
+
+	edit_box.Draw(midx, midy, edit_box_width, 1)
+	termbox.SetCursor(midx+edit_box.CursorX(), midy)
+
+	tbprint(midx+6, midy+3, coldef, coldef, "Press ESC to quit")
+	termbox.Flush()
 }
-
-// left oriented
-func draw_test_grid(x_start int, y_start int, coldef termbox.Attribute) {
-	fillWithJunk(files[:])
-	// termbox.SetCell(x_start, y_start, '│', coldef, coldef)
-	for i := 0; i < grid_rows; i++ {
-		for j := 0; j < grid_cols; j++ {
-			// iterate across x axis
-			left_side := (grid_cell_width * j) + x_start
-			// termbox.SetCell(left_side, y_start+i, 'O', coldef, coldef)
-			formatter := fmt.Sprintf("%%-%ds", grid_cell_width)
-			if j == grid_cols-1 {
-				termboxPrint(left_side, y_start+i, coldef, coldef, fmt.Sprintf(formatter, files[i]))
-			} else {
-				termboxPrint(left_side, y_start+i, coldef, coldef, fmt.Sprintf(formatter, "0"))
-			}
-		}
-	}
-}
-
-// state of selection
-var x_marker int = 1
-var y_marker int = 1
-
-// starting upper left corner of canvas
-var x_start int = 0
-var y_start int = 0
-
-var xGridStart int = 0
-var yGridStart int = 2
 
 var arrowLeft = '←'
 var arrowRight = '→'
@@ -298,80 +279,6 @@ func init() {
 	}
 }
 
-func min_int(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-func max_int(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
-
-// This should move the marker in the *backing data structure*.
-// These coordinates need not reflect the termbox cells displayed.
-func move_marker(x_change int, y_change int) {
-	x_marker = min_int(max_int(x_marker+x_change, 1), grid_cols)
-	y_marker = min_int(max_int(y_marker+y_change, 1), grid_rows)
-}
-
-// pass virtual coordinates, and place in termbox space
-func place_marker(x int, y int, coldef termbox.Attribute) {
-	if x == grid_cols {
-		formatter := fmt.Sprintf("%c %%-%ds", arrowRight, grid_cell_width)
-		termboxPrint(
-			(x-1)*grid_cell_width+xGridStart,
-			(y-1)+yGridStart,
-			coldef,
-			coldef,
-			fmt.Sprintf(formatter, files[y-1]),
-		)
-	} else {
-		termbox.SetCell(
-			(x-1)*grid_cell_width+xGridStart,
-			(y-1)+yGridStart,
-			'X',
-			coldef,
-			coldef,
-		)
-	}
-}
-
-// Handles drawing on the screen, hydrating grid with current state.
-func redraw() {
-	const coldef = termbox.ColorDefault
-	termbox.Clear(coldef, coldef)
-
-	// setting starting point of main screen object
-	// width and height
-	width, height := termbox.Size()
-	x_end := width - 1
-	y_end := height - 1
-
-	// unicode box drawing chars around the edit box
-	draw_test_grid(xGridStart, yGridStart, coldef)
-
-	// draw the dynamic content dependent on user input
-	// edit_box.Draw(x_start, y_start, edit_box_width, 1)
-	place_marker(x_marker, y_marker, coldef)
-
-	// draw top menu bar
-	curDir := ft.GetCurDir()
-	termboxPrint(x_start, y_start, coldef, coldef, curDir)
-
-	// draw bottom menu bar
-	coordStr := fmt.Sprintf("(%d,%d)", x_marker, y_marker)
-	termboxPrint(x_end-len(coordStr)+1, y_end, coldef, coldef, coordStr)
-	termboxPrint(xGridStart, y_end, coldef, coldef, "Press: ESC/CTRL+c (quit), h (help)")
-
-	// cleanup
-	termbox.Flush()
-}
-
 func main() {
 	err := termbox.Init()
 	if err != nil {
@@ -380,28 +287,40 @@ func main() {
 	defer termbox.Close()
 	termbox.SetInputMode(termbox.InputEsc)
 
-	redraw()
+	redraw_all()
 mainloop:
 	for {
 		switch ev := termbox.PollEvent(); ev.Type {
 		case termbox.EventKey:
 			switch ev.Key {
-			case termbox.KeyEsc, termbox.KeyCtrlC:
+			case termbox.KeyEsc:
 				break mainloop
 			case termbox.KeyArrowLeft, termbox.KeyCtrlB:
-				// edit_box.MoveCursorOneRuneBackward()
-				move_marker(-1, 0)
+				edit_box.MoveCursorOneRuneBackward()
 			case termbox.KeyArrowRight, termbox.KeyCtrlF:
-				// edit_box.MoveCursorOneRuneForward()
-				move_marker(1, 0)
-			case termbox.KeyArrowDown:
-				move_marker(0, 1)
-			case termbox.KeyArrowUp:
-				move_marker(0, -1)
+				edit_box.MoveCursorOneRuneForward()
+			case termbox.KeyBackspace, termbox.KeyBackspace2:
+				edit_box.DeleteRuneBackward()
+			case termbox.KeyDelete, termbox.KeyCtrlD:
+				edit_box.DeleteRuneForward()
+			case termbox.KeyTab:
+				edit_box.InsertRune('\t')
+			case termbox.KeySpace:
+				edit_box.InsertRune(' ')
+			case termbox.KeyCtrlK:
+				edit_box.DeleteTheRestOfTheLine()
+			case termbox.KeyHome, termbox.KeyCtrlA:
+				edit_box.MoveCursorToBeginningOfTheLine()
+			case termbox.KeyEnd, termbox.KeyCtrlE:
+				edit_box.MoveCursorToEndOfTheLine()
+			default:
+				if ev.Ch != 0 {
+					edit_box.InsertRune(ev.Ch)
+				}
 			}
 		case termbox.EventError:
 			panic(ev.Err)
 		}
-		redraw()
+		redraw_all()
 	}
 }

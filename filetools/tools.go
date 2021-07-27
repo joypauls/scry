@@ -1,10 +1,12 @@
 // This package is for handling all the file stuff.
+// - could store # of children for dir
 package filetools
 
 import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 )
 
 // SI defined base for multiple byte units
@@ -34,31 +36,26 @@ func humanizeBytes(bytes int64) string {
 //////////////////////
 
 type FileStats struct {
-	name       string
-	sizeRaw    int64
-	sizePretty string
-}
-
-type Directory struct {
-	files []FileStats
+	Name       string
+	SizeRaw    int64
+	SizePretty string
+	Label      string
+	Time       time.Time
 }
 
 func (fs *FileStats) Populate(d os.DirEntry) {
-	fs.name = d.Name()
+	fs.Name = d.Name()
+	fs.Label = "f"
+	if d.IsDir() {
+		fs.Label = "d"
+	}
 	fileInfo, err := d.Info() // FileInfo
 	if err != nil {
 		log.Fatal(err)
 	}
-	fs.sizeRaw = fileInfo.Size()
-	fs.sizePretty = humanizeBytes(fs.sizeRaw)
-}
-
-func parseDir(isDir bool) string {
-	directoryLabel := "file"
-	if isDir {
-		directoryLabel = "dir"
-	}
-	return directoryLabel
+	fs.SizeRaw = fileInfo.Size()
+	fs.SizePretty = humanizeBytes(fs.SizeRaw)
+	fs.Time = fileInfo.ModTime()
 }
 
 ///////////////////////

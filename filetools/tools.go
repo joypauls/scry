@@ -31,9 +31,9 @@ func humanizeBytes(bytes int64) string {
 	)
 }
 
-//////////////////////
-// Directory Reader //
-//////////////////////
+/////////////////
+// File Reader //
+/////////////////
 
 type FileStats struct {
 	Name       string
@@ -43,13 +43,13 @@ type FileStats struct {
 	Time       time.Time
 }
 
-func (fs *FileStats) Populate(d os.DirEntry) {
-	fs.Name = d.Name()
+func (fs *FileStats) Populate(de os.DirEntry) {
+	fs.Name = de.Name()
 	fs.Label = "f"
-	if d.IsDir() {
+	if de.IsDir() {
 		fs.Label = "d"
 	}
-	fileInfo, err := d.Info() // FileInfo
+	fileInfo, err := de.Info() // FileInfo
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -69,4 +69,18 @@ func GetCurDir() string {
 		log.Println(err)
 	}
 	return path
+}
+
+func GetFiles(path string) []FileStats {
+	files, err := os.ReadDir(path)
+	if err != nil {
+		log.Fatal(err)
+	}
+	var fs FileStats
+	var filesP []FileStats
+	for _, f := range files {
+		fs.Populate(f)
+		filesP = append(filesP, fs)
+	}
+	return filesP
 }

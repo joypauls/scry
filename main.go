@@ -23,13 +23,24 @@ func termboxPrint(x, y int, fg, bg termbox.Attribute, s string) {
 	}
 }
 
-func displayFile(x, y int, fg, bg termbox.Attribute, fs ft.FileStats) {
-	line := fmt.Sprintf("|%-5s|%-5d|%-9s|%s\n",
-		fs.Label,
-		fs.Time.Year(),
-		fs.SizePretty,
-		fs.Name,
-	)
+func displayFile(x, y int, fg, bg termbox.Attribute, fs ft.FileStats, selected bool) {
+	var line string
+	if selected {
+		line = fmt.Sprintf("|%-5s|%-5d|%-9s|%c %s\n",
+			fs.Label,
+			fs.Time.Year(),
+			fs.SizePretty,
+			arrowRight,
+			fs.Name,
+		)
+	} else {
+		line = fmt.Sprintf("|%-5s|%-5d|%-9s|%s\n",
+			fs.Label,
+			fs.Time.Year(),
+			fs.SizePretty,
+			fs.Name,
+		)
+	}
 	termboxPrint(x, y, fg, bg, line)
 }
 
@@ -86,9 +97,9 @@ func (d *Directory) Read() {
 // 	}
 // }
 
-// state of selection
-var xMarker int = 1
-var yMarker int = 1
+// the current selected index in the list
+// needs to be bounded by the current size of array of files
+var curIndex = 0
 
 // starting upper left corner of canvas
 var xStart int = 0
@@ -100,6 +111,7 @@ var yGridStart int = 2
 var arrowLeft = '←'
 var arrowRight = '→'
 
+// initialize one time configs at program start
 func init() {
 	if runewidth.EastAsianWidth {
 		arrowLeft = '<'
@@ -156,8 +168,8 @@ func redraw() {
 	termbox.Clear(coldef, coldef)
 
 	// setting starting point of main screen object
-	width, height := termbox.Size()
-	x_end := width - 1
+	_, height := termbox.Size()
+	// x_end := width - 1
 	y_end := height - 1
 
 	// draw_test_grid(xGridStart, yGridStart, coldef)
@@ -171,12 +183,12 @@ func redraw() {
 
 	// draw files
 	for i, f := range dir.files {
-		displayFile(xGridStart, yGridStart+i, coldef, coldef, f)
+		displayFile(xGridStart, yGridStart+i, coldef, coldef, f, i == curIndex)
 	}
 
 	// draw bottom menu bar
-	coordStr := fmt.Sprintf("(%d,%d)", xMarker, yMarker)
-	termboxPrint(x_end-len(coordStr)+1, y_end, coldef, coldef, coordStr)
+	// coordStr := fmt.Sprintf("(%d,%d)", xMarker, yMarker)
+	// termboxPrint(x_end-len(coordStr)+1, y_end, coldef, coldef, coordStr)
 	termboxPrint(xGridStart, y_end, coldef, coldef, "Press: ESC/CTRL+c (quit), h (help)")
 
 	// cleanup

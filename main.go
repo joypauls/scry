@@ -24,19 +24,20 @@ func termboxPrint(x, y int, fg, bg termbox.Attribute, s string) {
 }
 
 func displayFile(x, y int, fg, bg termbox.Attribute, fs ft.FileStats, selected bool) {
+	formatter := "%-5s %-10s %-9s"
 	var line string
 	if selected {
-		line = fmt.Sprintf("|%-5s|%-5d|%-9s|%c %s\n",
+		line = fmt.Sprintf(formatter+"  %c  %s",
 			fs.Label,
-			fs.Time.Year(),
+			fmt.Sprintf("%d-%d-%d", fs.Time.Month(), fs.Time.Day(), fs.Time.Year()),
 			fs.SizePretty,
 			arrowRight,
 			fs.Name,
 		)
 	} else {
-		line = fmt.Sprintf("|%-5s|%-5d|%-9s|%s\n",
+		line = fmt.Sprintf(formatter+" %s",
 			fs.Label,
-			fs.Time.Year(),
+			fmt.Sprintf("%d-%d-%d", fs.Time.Month(), fs.Time.Day(), fs.Time.Year()),
 			fs.SizePretty,
 			fs.Name,
 		)
@@ -100,6 +101,7 @@ func (d *Directory) Read() {
 // the current selected index in the list
 // needs to be bounded by the current size of array of files
 var curIndex = 0
+var maxIndex = 0
 
 // starting upper left corner of canvas
 var xStart int = 0
@@ -133,12 +135,11 @@ func maxInt(a, b int) int {
 	return b
 }
 
-// // This should move the marker in the *backing data structure*.
-// // These coordinates need not reflect the termbox cells displayed.
-// func moveMarker(x_change int, y_change int) {
-// 	xMarker = minInt(maxInt(xMarker+x_change, 1), grid_cols)
-// 	yMarker = minInt(maxInt(yMarker+y_change, 1), grid_rows)
-// }
+// This should move the marker in the *backing data structure*.
+// These coordinates need not reflect the termbox cells displayed.
+func moveIndex(change int) {
+	curIndex = minInt(maxInt(curIndex+change, 0), maxIndex)
+}
 
 // // pass virtual coordinates, and place in termbox space
 // func placeMarker(x int, y int, coldef termbox.Attribute) {
@@ -168,15 +169,13 @@ func redraw() {
 	termbox.Clear(coldef, coldef)
 
 	// setting starting point of main screen object
-	_, height := termbox.Size()
-	// x_end := width - 1
+	width, height := termbox.Size()
+	x_end := width - 1
 	y_end := height - 1
 
-	// draw_test_grid(xGridStart, yGridStart, coldef)
-	// placeMarker(xMarker, yMarker, coldef)
-
-	var dir Directory
+	var dir Directory // do we need to redeclare??
 	dir.Read()
+	maxIndex = len(dir.files) - 1 // update
 
 	// draw top menu bar
 	termboxPrint(xStart, yStart, coldef, coldef, dir.path)
@@ -187,9 +186,9 @@ func redraw() {
 	}
 
 	// draw bottom menu bar
-	// coordStr := fmt.Sprintf("(%d,%d)", xMarker, yMarker)
-	// termboxPrint(x_end-len(coordStr)+1, y_end, coldef, coldef, coordStr)
-	termboxPrint(xGridStart, y_end, coldef, coldef, "Press: ESC/CTRL+c (quit), h (help)")
+	coordStr := fmt.Sprintf("(%d)", curIndex)
+	termboxPrint(x_end-len(coordStr)+1, y_end, coldef, coldef, coordStr)
+	termboxPrint(xGridStart, y_end, coldef, coldef, "[ESC] quit, [h] help")
 
 	// cleanup
 	termbox.Flush()
@@ -212,16 +211,10 @@ loop:
 			switch ev.Key {
 			case termbox.KeyEsc, termbox.KeyCtrlC:
 				break loop
-				// case termbox.KeyArrowLeft, termbox.KeyCtrlB:
-				// 	// edit_box.MoveCursorOneRuneBackward()
-				// 	moveMarker(-1, 0)
-				// case termbox.KeyArrowRight, termbox.KeyCtrlF:
-				// 	// edit_box.MoveCursorOneRuneForward()
-				// 	moveMarker(1, 0)
-				// case termbox.KeyArrowDown:
-				// 	moveMarker(0, 1)
-				// case termbox.KeyArrowUp:
-				// 	moveMarker(0, -1)
+			case termbox.KeyArrowDown:
+				moveIndex(1)
+			case termbox.KeyArrowUp:
+				moveIndex(-1)
 			}
 		case termbox.EventError:
 			panic(ev.Err)

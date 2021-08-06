@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"unicode/utf8"
 
-	ft "github.com/joypauls/file-scry/filetools"
+	ft "github.com/joypauls/scry/filetools"
 	"github.com/mattn/go-runewidth"
 	"github.com/nsf/termbox-go"
 )

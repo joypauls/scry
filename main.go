@@ -6,10 +6,12 @@ package main
 import (
 	"fmt"
 
-	ft "github.com/joypauls/file-scry/filetools"
+	ft "github.com/joypauls/scry/filetools"
 	"github.com/mattn/go-runewidth"
 	"github.com/nsf/termbox-go"
 )
+
+const coldef = termbox.ColorDefault // termbox.Attribute
 
 ////////////////////////////////
 // Termbox Printing Utilities //
@@ -23,25 +25,19 @@ func termboxPrint(x, y int, fg, bg termbox.Attribute, s string) {
 	}
 }
 
-func displayFile(x, y int, fg, bg termbox.Attribute, fs ft.FileStats, selected bool) {
-	formatter := "%-3s %-10s %-9s"
-	var line string
+func displayFile(x, y int, fs ft.FileStats, selected bool) {
+	fg := coldef
+	bg := coldef
 	if selected {
-		line = fmt.Sprintf(formatter+"  %c  %s",
-			fs.Label,
-			fmt.Sprintf("%d-%d-%d", fs.Time.Month(), fs.Time.Day(), fs.Time.Year()),
-			fs.SizePretty,
-			arrowRight,
-			fs.Name,
-		)
-	} else {
-		line = fmt.Sprintf(formatter+" %s",
-			fs.Label,
-			fmt.Sprintf("%d-%d-%d", fs.Time.Month(), fs.Time.Day(), fs.Time.Year()),
-			fs.SizePretty,
-			fs.Name,
-		)
+		fg = termbox.ColorCyan
+		bg = termbox.ColorBlack
 	}
+	line := fmt.Sprintf("%s  %-10s %-9s %s",
+		fs.Label,
+		fmt.Sprintf("%d-%d-%d", fs.Time.Month(), fs.Time.Day(), fs.Time.Year()),
+		fs.SizePretty,
+		fs.Name,
+	)
 	termboxPrint(x, y, fg, bg, line)
 }
 
@@ -130,7 +126,6 @@ func moveIndex(change int) {
 
 // Handles drawing on the screen, hydrating grid with current state.
 func refresh(frame *Frame) {
-	const coldef = termbox.ColorDefault
 	termbox.Clear(coldef, coldef)
 
 	var dir Directory // do we need to redeclare??
@@ -139,15 +134,15 @@ func refresh(frame *Frame) {
 
 	// draw top menu bar
 	termboxPrint(0, 0, coldef, coldef, dir.path)
-	termboxPrint(0, 1, coldef, coldef, "-------------------------------------------------------")
+	// termboxPrint(0, 1, coldef, coldef, "-------------------------------------------------------")
 
 	// draw files
 	for i, f := range dir.files {
-		displayFile(0, 0+frame.topPad+i, coldef, coldef, f, i == curIndex)
+		displayFile(0, 0+frame.topPad+i, f, i == curIndex)
 	}
 
 	// draw bottom menu bar
-	termboxPrint(0, frame.yEnd-1, coldef, coldef, "-------------------------------------------------------")
+	// termboxPrint(0, frame.yEnd-1, coldef, coldef, "-------------------------------------------------------")
 	coordStr := fmt.Sprintf("(%d)", curIndex)
 	termboxPrint(frame.xEnd-len(coordStr)+1, frame.yEnd, coldef, coldef, coordStr)
 	termboxPrint(0, frame.yEnd, coldef, coldef, "[ESC] quit, [h] help")

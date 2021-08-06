@@ -15,7 +15,9 @@ const SIPrefixes = "kMGTPE"
 
 // symbols
 const dirLabel = "📁"
-const fileLabel = "📄"
+const fileLabel = "  "
+
+// const fileLabel = "📄"
 
 // Converts an integer number of bytes to SI units.
 func humanizeBytes(bytes int64) string {

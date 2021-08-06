@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	ft "github.com/joypauls/file-scry/filetools"
+	ft "github.com/joypauls/scry/filetools"
 )
 
 func main() {

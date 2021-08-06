@@ -24,7 +24,7 @@ func termboxPrint(x, y int, fg, bg termbox.Attribute, s string) {
 }
 
 func displayFile(x, y int, fg, bg termbox.Attribute, fs ft.FileStats, selected bool) {
-	formatter := "%-5s %-10s %-9s"
+	formatter := "%-3s %-10s %-9s"
 	var line string
 	if selected {
 		line = fmt.Sprintf(formatter+"  %c  %s",
@@ -45,6 +45,35 @@ func displayFile(x, y int, fg, bg termbox.Attribute, fs ft.FileStats, selected b
 	termboxPrint(x, y, fg, bg, line)
 }
 
+////////
+// UI //
+////////
+
+// Here we're managing the UI framing
+type Frame struct {
+	width     int
+	height    int
+	xEnd      int
+	yEnd      int
+	topPad    int
+	bottomPad int
+}
+
+func (f *Frame) Init() {
+	f.width, f.height = termbox.Size()
+	f.xEnd = f.width - 1
+	f.yEnd = f.height - 1
+	f.topPad = 2
+	f.bottomPad = 2
+}
+
+// generator func for Frame
+func NewFrame() *Frame {
+	f := new(Frame)
+	f.Init()
+	return f
+}
+
 /////////////////////
 // Directory State //
 /////////////////////
@@ -63,52 +92,10 @@ func (d *Directory) Read() {
 // Main Program //
 //////////////////
 
-// var edit_box EditBox
-
-// const edit_box_width = 30
-
-// const grid_cols = 5 // not character width, grid cell width
-// const grid_rows = 5
-// const grid_cell_width = 7
-
-// var files [grid_rows]string
-
-// func fillWithJunk(files []string) {
-// 	for i := 0; i < grid_rows; i++ {
-// 		files[i] = fmt.Sprintf("file%d", i)
-// 	}
-// }
-
-// // left oriented
-// func draw_test_grid(xStart int, yStart int, coldef termbox.Attribute) {
-// 	fillWithJunk(files[:])
-// 	// termbox.SetCell(xStart, yStart, '│', coldef, coldef)
-// 	for i := 0; i < grid_rows; i++ {
-// 		for j := 0; j < grid_cols; j++ {
-// 			// iterate across x axis
-// 			left_side := (grid_cell_width * j) + xStart
-// 			// termbox.SetCell(left_side, yStart+i, 'O', coldef, coldef)
-// 			formatter := fmt.Sprintf("%%-%ds", grid_cell_width)
-// 			if j == grid_cols-1 {
-// 				termboxPrint(left_side, yStart+i, coldef, coldef, fmt.Sprintf(formatter, files[i]))
-// 			} else {
-// 				termboxPrint(left_side, yStart+i, coldef, coldef, fmt.Sprintf(formatter, "0"))
-// 			}
-// 		}
-// 	}
-// }
-
 // the current selected index in the list
 // needs to be bounded by the current size of array of files
 var curIndex = 0
 var maxIndex = 0
-
-// starting upper left corner of canvas
-var xStart int = 0
-var yStart int = 0
-
-var xGridStart int = 0
-var yGridStart int = 2
 
 var arrowLeft = '←'
 var arrowRight = '→'
@@ -141,54 +128,29 @@ func moveIndex(change int) {
 	curIndex = minInt(maxInt(curIndex+change, 0), maxIndex)
 }
 
-// // pass virtual coordinates, and place in termbox space
-// func placeMarker(x int, y int, coldef termbox.Attribute) {
-// 	if x == grid_cols {
-// 		formatter := fmt.Sprintf("%c %%-%ds", arrowRight, grid_cell_width)
-// 		termboxPrint(
-// 			(x-1)*grid_cell_width+xGridStart,
-// 			(y-1)+yGridStart,
-// 			coldef,
-// 			coldef,
-// 			fmt.Sprintf(formatter, files[y-1]),
-// 		)
-// 	} else {
-// 		termbox.SetCell(
-// 			(x-1)*grid_cell_width+xGridStart,
-// 			(y-1)+yGridStart,
-// 			'X',
-// 			coldef,
-// 			coldef,
-// 		)
-// 	}
-// }
-
 // Handles drawing on the screen, hydrating grid with current state.
-func redraw() {
+func refresh(frame *Frame) {
 	const coldef = termbox.ColorDefault
 	termbox.Clear(coldef, coldef)
-
-	// setting starting point of main screen object
-	width, height := termbox.Size()
-	x_end := width - 1
-	y_end := height - 1
 
 	var dir Directory // do we need to redeclare??
 	dir.Read()
 	maxIndex = len(dir.files) - 1 // update
 
 	// draw top menu bar
-	termboxPrint(xStart, yStart, coldef, coldef, dir.path)
+	termboxPrint(0, 0, coldef, coldef, dir.path)
+	termboxPrint(0, 1, coldef, coldef, "-------------------------------------------------------")
 
 	// draw files
 	for i, f := range dir.files {
-		displayFile(xGridStart, yGridStart+i, coldef, coldef, f, i == curIndex)
+		displayFile(0, 0+frame.topPad+i, coldef, coldef, f, i == curIndex)
 	}
 
 	// draw bottom menu bar
+	termboxPrint(0, frame.yEnd-1, coldef, coldef, "-------------------------------------------------------")
 	coordStr := fmt.Sprintf("(%d)", curIndex)
-	termboxPrint(x_end-len(coordStr)+1, y_end, coldef, coldef, coordStr)
-	termboxPrint(xGridStart, y_end, coldef, coldef, "[ESC] quit, [h] help")
+	termboxPrint(frame.xEnd-len(coordStr)+1, frame.yEnd, coldef, coldef, coordStr)
+	termboxPrint(0, frame.yEnd, coldef, coldef, "[ESC] quit, [h] help")
 
 	// cleanup
 	termbox.Flush()
@@ -202,7 +164,9 @@ func main() {
 	defer termbox.Close()
 	termbox.SetInputMode(termbox.InputEsc)
 
-	redraw()
+	frame := NewFrame()
+
+	refresh(frame)
 
 loop:
 	for {
@@ -219,6 +183,6 @@ loop:
 		case termbox.EventError:
 			panic(ev.Err)
 		}
-		redraw()
+		refresh(frame)
 	}
 }

@@ -13,6 +13,10 @@ import (
 const SIBase = 1000
 const SIPrefixes = "kMGTPE"
 
+// symbols
+const dirLabel = "📁"
+const fileLabel = "📄"
+
 // Converts an integer number of bytes to SI units.
 func humanizeBytes(bytes int64) string {
 	if bytes < SIBase {
@@ -45,9 +49,9 @@ type FileStats struct {
 
 func (fs *FileStats) Populate(de os.DirEntry) {
 	fs.Name = de.Name()
-	fs.Label = "f"
+	fs.Label = fileLabel
 	if de.IsDir() {
-		fs.Label = "d"
+		fs.Label = dirLabel
 	}
 	fileInfo, err := de.Info() // FileInfo
 	if err != nil {

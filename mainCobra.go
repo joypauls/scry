@@ -17,6 +17,6 @@ package main
 
 import "github.com/joypauls/scry/cmd"
 
-func main() {
+func mainTemp() {
 	cmd.Execute()
 }

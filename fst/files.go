@@ -1,6 +1,6 @@
-// This package is for handling all the file stuff.
-// - could store # of children for dir
-package filetools
+// File System Tools
+// Dealing with individual files here.
+package fst
 
 import (
 	"fmt"
@@ -63,29 +63,4 @@ func NewFile(d os.DirEntry) *File {
 	f.SizePretty = humanizeBytes(f.SizeRaw)
 	f.Time = fileInfo.ModTime()
 	return f
-}
-
-///////////////////////
-// General Utilities //
-///////////////////////
-
-// returning the path of pwd
-func GetCurDir() string {
-	path, err := os.Getwd()
-	if err != nil {
-		log.Println(err)
-	}
-	return path
-}
-
-func GetFiles(path string) []*File {
-	rawFiles, err := os.ReadDir(path)
-	if err != nil {
-		log.Fatal(err)
-	}
-	var files []*File
-	for _, f := range rawFiles {
-		files = append(files, NewFile(f))
-	}
-	return files
 }

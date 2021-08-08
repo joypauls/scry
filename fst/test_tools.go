@@ -1,5 +1,5 @@
-// Unit tests for filetools package.
-package filetools
+// Unit tests for fst package.
+package fst
 
 // import (
 // 	"regexp"

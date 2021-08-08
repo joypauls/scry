@@ -6,7 +6,7 @@ package main
 import (
 	"fmt"
 
-	ft "github.com/joypauls/scry/filetools"
+	"github.com/joypauls/scry/fst"
 	"github.com/mattn/go-runewidth"
 	"github.com/nsf/termbox-go"
 )
@@ -25,7 +25,7 @@ func termboxPrint(x, y int, fg, bg termbox.Attribute, s string) {
 	}
 }
 
-func displayFile(x, y int, selected bool, f *ft.File) {
+func displayFile(x, y int, selected bool, f *fst.File) {
 	fg := coldef
 	bg := coldef
 	if selected {
@@ -45,7 +45,7 @@ func displayFile(x, y int, selected bool, f *ft.File) {
 // UI //
 ////////
 
-// Here we're managing the UI framing
+// Managing the UI layout
 type Frame struct {
 	width     int
 	height    int
@@ -64,22 +64,6 @@ func NewFrame() *Frame {
 	f.topPad = 2
 	f.bottomPad = 2
 	return f
-}
-
-/////////////////////
-// Directory State //
-/////////////////////
-
-type Directory struct {
-	path  string
-	files []*ft.File
-}
-
-func NewDirectory(path string) *Directory {
-	d := new(Directory)
-	d.path = path
-	d.files = ft.GetFiles(path)
-	return d
 }
 
 //////////////////
@@ -123,17 +107,17 @@ func moveIndex(change int) {
 }
 
 // Handles drawing on the screen, hydrating grid with current state.
-func refresh(frame *Frame, d *Directory) {
+func refresh(frame *Frame, d *fst.Directory) {
 	termbox.Clear(coldef, coldef)
 
-	maxIndex = len(d.files) - 1 // update
+	maxIndex = len(d.Files) - 1 // update
 
 	// draw top menu bar
-	termboxPrint(0, 0, coldef, coldef, d.path)
+	termboxPrint(0, 0, coldef, coldef, d.Path)
 	// termboxPrint(0, 1, coldef, coldef, "-------------------------------------------------------")
 
 	// draw files
-	for i, f := range d.files {
+	for i, f := range d.Files {
 		displayFile(0, 0+frame.topPad+i, i == curIndex, f)
 	}
 
@@ -157,10 +141,9 @@ func main() {
 
 	// set the frame
 	frame := NewFrame()
-
 	// init in current directory
-	curDir := ft.GetCurDir()
-	d := NewDirectory(curDir)
+	curDir := fst.GetCurDir()
+	d := fst.NewDirectory(curDir)
 
 	// draw the UI for the first time
 	refresh(frame, d)

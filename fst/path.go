@@ -20,6 +20,10 @@ func (p *Path) Get() string {
 	return p.cur
 }
 
+func (p *Path) GetParent() string {
+	return p.parent
+}
+
 // right now only works for starting at current directory
 func InitPath() *Path {
 	p := new(Path)

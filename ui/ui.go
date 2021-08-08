@@ -128,10 +128,14 @@ loop:
 				moveIndex(1)
 			case termbox.KeyArrowUp:
 				moveIndex(-1)
+			case termbox.KeyArrowLeft:
+				curDir.Set(curDir.GetParent())
+				d = fst.NewDirectory(curDir) // this shouldn't be a whole new object
 			}
 		case termbox.EventError:
 			log.Fatal(ev.Err) // os.Exit(1) follows
 		}
+
 		refresh(layout, d)
 	}
 }

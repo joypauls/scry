@@ -72,7 +72,7 @@ func moveIndex(change int) {
 
 func drawFrame(l *Layout, d *fst.Directory) {
 	// top line
-	draw(0, 0, coldef, coldef, d.Path)
+	draw(0, 0, coldef, coldef, d.Path.Get())
 	// bottom line
 	coordStr := fmt.Sprintf("(%d)", curIndex)
 	draw(l.xEnd-len(coordStr)+1, l.yEnd, coldef, coldef, coordStr)
@@ -111,7 +111,7 @@ func Run() {
 	// set the layout
 	layout := NewLayout()
 	// init in current directory
-	curDir := fst.GetCurDir()
+	curDir := fst.InitPath() // should go in state wrapper
 	d := fst.NewDirectory(curDir)
 
 	// draw the UI for the first time

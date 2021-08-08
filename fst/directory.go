@@ -7,8 +7,8 @@ import (
 	"os"
 )
 
-func getFiles(path string) []*File {
-	rawFiles, err := os.ReadDir(path)
+func getFiles(p *Path) []*File {
+	rawFiles, err := os.ReadDir(p.Get())
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -20,13 +20,13 @@ func getFiles(path string) []*File {
 }
 
 type Directory struct {
-	Path  string
+	Path  *Path
 	Files []*File
 }
 
-func NewDirectory(path string) *Directory {
+func NewDirectory(p *Path) *Directory {
 	d := new(Directory)
-	d.Path = path
-	d.Files = getFiles(path)
+	d.Path = p
+	d.Files = getFiles(p)
 	return d
 }

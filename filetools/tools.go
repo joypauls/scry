@@ -11,13 +11,12 @@ import (
 
 // SI defined base for multiple byte units
 const SIBase = 1000
-const SIPrefixes = "kMGTPE"
+
+var SIPrefixes = [6]rune{'k', 'M', 'G', 'T', 'P', 'E'}
 
 // symbols
 const dirLabel = "📁"
 const fileLabel = "  "
-
-// const fileLabel = "📄"
 
 // Converts an integer number of bytes to SI units.
 func humanizeBytes(bytes int64) string {
@@ -41,7 +40,7 @@ func humanizeBytes(bytes int64) string {
 // File Reader //
 /////////////////
 
-type FileStats struct {
+type File struct {
 	Name       string
 	SizeRaw    int64
 	SizePretty string
@@ -49,19 +48,21 @@ type FileStats struct {
 	Time       time.Time
 }
 
-func (fs *FileStats) Populate(de os.DirEntry) {
-	fs.Name = de.Name()
-	fs.Label = fileLabel
-	if de.IsDir() {
-		fs.Label = dirLabel
+func NewFile(d os.DirEntry) *File {
+	f := new(File) // new pointer to a File
+	f.Name = d.Name()
+	f.Label = fileLabel
+	if d.IsDir() {
+		f.Label = dirLabel
 	}
-	fileInfo, err := de.Info() // FileInfo
+	fileInfo, err := d.Info() // FileInfo
 	if err != nil {
 		log.Fatal(err)
 	}
-	fs.SizeRaw = fileInfo.Size()
-	fs.SizePretty = humanizeBytes(fs.SizeRaw)
-	fs.Time = fileInfo.ModTime()
+	f.SizeRaw = fileInfo.Size()
+	f.SizePretty = humanizeBytes(f.SizeRaw)
+	f.Time = fileInfo.ModTime()
+	return f
 }
 
 ///////////////////////
@@ -77,16 +78,14 @@ func GetCurDir() string {
 	return path
 }
 
-func GetFiles(path string) []FileStats {
-	files, err := os.ReadDir(path)
+func GetFiles(path string) []*File {
+	rawFiles, err := os.ReadDir(path)
 	if err != nil {
 		log.Fatal(err)
 	}
-	var fs FileStats
-	var filesP []FileStats
-	for _, f := range files {
-		fs.Populate(f)
-		filesP = append(filesP, fs)
+	var files []*File
+	for _, f := range rawFiles {
+		files = append(files, NewFile(f))
 	}
-	return filesP
+	return files
 }

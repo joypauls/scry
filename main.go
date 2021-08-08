@@ -25,18 +25,18 @@ func termboxPrint(x, y int, fg, bg termbox.Attribute, s string) {
 	}
 }
 
-func displayFile(x, y int, fs ft.FileStats, selected bool) {
+func displayFile(x, y int, selected bool, f *ft.File) {
 	fg := coldef
 	bg := coldef
 	if selected {
-		fg = termbox.ColorCyan
-		bg = termbox.ColorBlack
+		fg = termbox.ColorBlack
+		bg = termbox.ColorCyan
 	}
 	line := fmt.Sprintf("%s  %-10s %-9s %s",
-		fs.Label,
-		fmt.Sprintf("%d-%d-%d", fs.Time.Month(), fs.Time.Day(), fs.Time.Year()),
-		fs.SizePretty,
-		fs.Name,
+		f.Label,
+		fmt.Sprintf("%02d-%02d-%d", f.Time.Month(), f.Time.Day(), f.Time.Year()%100),
+		f.SizePretty,
+		f.Name,
 	)
 	termboxPrint(x, y, fg, bg, line)
 }
@@ -55,18 +55,14 @@ type Frame struct {
 	bottomPad int
 }
 
-func (f *Frame) Init() {
+// generator func for Frame
+func NewFrame() *Frame {
+	f := new(Frame)
 	f.width, f.height = termbox.Size()
 	f.xEnd = f.width - 1
 	f.yEnd = f.height - 1
 	f.topPad = 2
 	f.bottomPad = 2
-}
-
-// generator func for Frame
-func NewFrame() *Frame {
-	f := new(Frame)
-	f.Init()
 	return f
 }
 
@@ -76,12 +72,14 @@ func NewFrame() *Frame {
 
 type Directory struct {
 	path  string
-	files []ft.FileStats
+	files []*ft.File
 }
 
-func (d *Directory) Read() {
-	d.path = ft.GetCurDir() // this should be less limited
-	d.files = ft.GetFiles(".")
+func NewDirectory(path string) *Directory {
+	d := new(Directory)
+	d.path = path
+	d.files = ft.GetFiles(path)
+	return d
 }
 
 //////////////////
@@ -125,20 +123,18 @@ func moveIndex(change int) {
 }
 
 // Handles drawing on the screen, hydrating grid with current state.
-func refresh(frame *Frame) {
+func refresh(frame *Frame, d *Directory) {
 	termbox.Clear(coldef, coldef)
 
-	var dir Directory // do we need to redeclare??
-	dir.Read()
-	maxIndex = len(dir.files) - 1 // update
+	maxIndex = len(d.files) - 1 // update
 
 	// draw top menu bar
-	termboxPrint(0, 0, coldef, coldef, dir.path)
+	termboxPrint(0, 0, coldef, coldef, d.path)
 	// termboxPrint(0, 1, coldef, coldef, "-------------------------------------------------------")
 
 	// draw files
-	for i, f := range dir.files {
-		displayFile(0, 0+frame.topPad+i, f, i == curIndex)
+	for i, f := range d.files {
+		displayFile(0, 0+frame.topPad+i, i == curIndex, f)
 	}
 
 	// draw bottom menu bar
@@ -159,9 +155,15 @@ func main() {
 	defer termbox.Close()
 	termbox.SetInputMode(termbox.InputEsc)
 
+	// set the frame
 	frame := NewFrame()
 
-	refresh(frame)
+	// init in current directory
+	curDir := ft.GetCurDir()
+	d := NewDirectory(curDir)
+
+	// draw the UI for the first time
+	refresh(frame, d)
 
 loop:
 	for {
@@ -178,6 +180,6 @@ loop:
 		case termbox.EventError:
 			panic(ev.Err)
 		}
-		refresh(frame)
+		refresh(frame, d)
 	}
 }

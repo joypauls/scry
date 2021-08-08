@@ -5,6 +5,7 @@ package ui
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/joypauls/scry/fst"
 	"github.com/mattn/go-runewidth"
@@ -12,41 +13,19 @@ import (
 )
 
 const coldef = termbox.ColorDefault // termbox.Attribute
+var arrowLeft = '←'
+var arrowRight = '→'
 
-////////////////////////////////
-// Termbox Printing Utilities //
-////////////////////////////////
-
-// Uses termbox specific functionality to display a string in cells.
-func termboxPrint(x, y int, fg, bg termbox.Attribute, s string) {
-	for _, c := range s {
-		termbox.SetCell(x, y, c, fg, bg)
-		x += runewidth.RuneWidth(c)
+// initialize one time display-related configs at program start
+func config() {
+	if runewidth.EastAsianWidth {
+		arrowLeft = '<'
+		arrowRight = '>'
 	}
 }
-
-func displayFile(x, y int, selected bool, f *fst.File) {
-	fg := coldef
-	bg := coldef
-	if selected {
-		fg = termbox.ColorBlack
-		bg = termbox.ColorCyan
-	}
-	line := fmt.Sprintf("%s  %-10s %-9s %s",
-		f.Label,
-		fmt.Sprintf("%02d-%02d-%d", f.Time.Month(), f.Time.Day(), f.Time.Year()%100),
-		f.SizePretty,
-		f.Name,
-	)
-	termboxPrint(x, y, fg, bg, line)
-}
-
-////////
-// UI //
-////////
 
 // Managing the UI layout
-type Frame struct {
+type Layout struct {
 	width     int
 	height    int
 	xEnd      int
@@ -55,9 +34,9 @@ type Frame struct {
 	bottomPad int
 }
 
-// generator func for Frame
-func NewFrame() *Frame {
-	f := new(Frame)
+// generator func for Layout
+func NewLayout() *Layout {
+	f := new(Layout)
 	f.width, f.height = termbox.Size()
 	f.xEnd = f.width - 1
 	f.yEnd = f.height - 1
@@ -66,25 +45,10 @@ func NewFrame() *Frame {
 	return f
 }
 
-//////////////////
-// Main Program //
-//////////////////
-
 // the current selected index in the list
 // needs to be bounded by the current size of array of files
 var curIndex = 0
 var maxIndex = 0
-
-var arrowLeft = '←'
-var arrowRight = '→'
-
-// initialize one time configs at program start
-func init() {
-	if runewidth.EastAsianWidth {
-		arrowLeft = '<'
-		arrowRight = '>'
-	}
-}
 
 func minInt(a, b int) int {
 	if a < b {
@@ -106,31 +70,34 @@ func moveIndex(change int) {
 	curIndex = minInt(maxInt(curIndex+change, 0), maxIndex)
 }
 
-// Handles drawing on the screen, hydrating grid with current state.
-func refresh(frame *Frame, d *fst.Directory) {
-	termbox.Clear(coldef, coldef)
-
-	maxIndex = len(d.Files) - 1 // update
-
-	// draw top menu bar
-	termboxPrint(0, 0, coldef, coldef, d.Path)
-	// termboxPrint(0, 1, coldef, coldef, "-------------------------------------------------------")
-
-	// draw files
-	for i, f := range d.Files {
-		displayFile(0, 0+frame.topPad+i, i == curIndex, f)
-	}
-
-	// draw bottom menu bar
-	// termboxPrint(0, frame.yEnd-1, coldef, coldef, "-------------------------------------------------------")
+func drawFrame(l *Layout, d *fst.Directory) {
+	// top line
+	draw(0, 0, coldef, coldef, d.Path)
+	// bottom line
 	coordStr := fmt.Sprintf("(%d)", curIndex)
-	termboxPrint(frame.xEnd-len(coordStr)+1, frame.yEnd, coldef, coldef, coordStr)
-	termboxPrint(0, frame.yEnd, coldef, coldef, "[ESC] quit, [h] help")
-
-	// cleanup
-	termbox.Flush()
+	draw(l.xEnd-len(coordStr)+1, l.yEnd, coldef, coldef, coordStr)
+	draw(0, l.yEnd, coldef, coldef, "[ESC] quit, [h] help")
 }
 
+func drawWindow(l *Layout, d *fst.Directory) {
+	for i, f := range d.Files {
+		drawFile(0, 0+l.topPad+i, i == curIndex, f)
+	}
+}
+
+// Handles drawing on the screen, hydrating grid with current state.
+func refresh(l *Layout, d *fst.Directory) {
+	termbox.Clear(coldef, coldef) // reset
+
+	maxIndex = len(d.Files) - 1 // update num files
+
+	drawFrame(l, d)
+	drawWindow(l, d) // main content
+
+	termbox.Flush() // clean
+}
+
+// Main program loop and user interactions
 func Run() {
 	err := termbox.Init()
 	if err != nil {
@@ -139,14 +106,16 @@ func Run() {
 	defer termbox.Close()
 	termbox.SetInputMode(termbox.InputEsc)
 
-	// set the frame
-	frame := NewFrame()
+	config()
+
+	// set the layout
+	layout := NewLayout()
 	// init in current directory
 	curDir := fst.GetCurDir()
 	d := fst.NewDirectory(curDir)
 
 	// draw the UI for the first time
-	refresh(frame, d)
+	refresh(layout, d)
 
 loop:
 	for {
@@ -161,8 +130,8 @@ loop:
 				moveIndex(-1)
 			}
 		case termbox.EventError:
-			panic(ev.Err)
+			log.Fatal(ev.Err) // os.Exit(1) follows
 		}
-		refresh(frame, d)
+		refresh(layout, d)
 	}
 }

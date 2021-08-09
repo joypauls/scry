@@ -54,7 +54,7 @@ func drawFile(x, y int, selected bool, f *fst.File) {
 	if f.IsDir {
 		label = dirLabel
 	}
-	line := fmt.Sprintf("%s  %s  %#o  %-9s  %s ",
+	line := fmt.Sprintf("%s  %-4s  %#-4o  %-9s  %s ",
 		label,
 		fmt.Sprintf("%02d-%02d-%d", f.Time.Month(), f.Time.Day(), f.Time.Year()%100),
 		f.Perm,

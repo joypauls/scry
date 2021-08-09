@@ -16,11 +16,11 @@ func (p *Path) Set(s string) {
 	p.parent = fp.Dir(s)
 }
 
-func (p *Path) Get() string {
+func (p *Path) Cur() string {
 	return p.cur
 }
 
-func (p *Path) GetParent() string {
+func (p *Path) Parent() string {
 	return p.parent
 }
 

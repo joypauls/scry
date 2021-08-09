@@ -6,6 +6,7 @@ package ui
 import (
 	"fmt"
 	"log"
+	fp "path/filepath"
 
 	"github.com/joypauls/scry/fst"
 	"github.com/mattn/go-runewidth"
@@ -17,12 +18,18 @@ var arrowLeft = '←'
 var arrowRight = '→'
 
 // initialize one time display-related configs at program start
+// this could probably be a configuration struct
 func config() {
 	if runewidth.EastAsianWidth {
 		arrowLeft = '<'
 		arrowRight = '>'
 	}
 }
+
+// the current selected index in the list
+// needs to be bounded by the current size of array of files
+var curIndex = 0
+var maxIndex = 0
 
 // Managing the UI layout
 type Layout struct {
@@ -44,11 +51,6 @@ func NewLayout() *Layout {
 	f.bottomPad = 2
 	return f
 }
-
-// the current selected index in the list
-// needs to be bounded by the current size of array of files
-var curIndex = 0
-var maxIndex = 0
 
 func minInt(a, b int) int {
 	if a < b {
@@ -72,7 +74,7 @@ func moveIndex(change int) {
 
 func drawFrame(l *Layout, d *fst.Directory) {
 	// top line
-	draw(0, 0, coldef, coldef, d.Path.Get())
+	draw(0, 0, coldef, coldef, d.Path.Cur())
 	// bottom line
 	coordStr := fmt.Sprintf("(%d)", curIndex)
 	draw(l.xEnd-len(coordStr)+1, l.yEnd, coldef, coldef, coordStr)
@@ -129,8 +131,14 @@ loop:
 			case termbox.KeyArrowUp:
 				moveIndex(-1)
 			case termbox.KeyArrowLeft:
-				curDir.Set(curDir.GetParent())
+				curDir.Set(curDir.Parent())
 				d = fst.NewDirectory(curDir) // this shouldn't be a whole new object
+			case termbox.KeyArrowRight:
+				sel := d.Files[curIndex]
+				if sel.IsDir {
+					curDir.Set(fp.Join(curDir.Cur(), sel.Name))
+					d = fst.NewDirectory(curDir)
+				}
 			}
 		case termbox.EventError:
 			log.Fatal(ev.Err) // os.Exit(1) follows

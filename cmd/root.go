@@ -1,5 +1,5 @@
 /*
-Copyright © 2021 NAME HERE <EMAIL ADDRESS>
+Copyright © 2021 Joy Paulsen
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -29,9 +29,14 @@ var cfgFile string
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "scry",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
+	Short: "A tool to help you navigate your file system",
+	Long: `Scry CLI     
+___________________________           
+    ___  ___ _ __ _   _   
+   / __|/ __| '__| | | |  
+   \__ \ (__| |  | |_| |  
+   |___/\___|_|   \__, |  
+__________________|___/ ___
 
 Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files

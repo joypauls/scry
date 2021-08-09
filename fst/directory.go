@@ -8,7 +8,7 @@ import (
 )
 
 func getFiles(p *Path) []*File {
-	rawFiles, err := os.ReadDir(p.Get())
+	rawFiles, err := os.ReadDir(p.Cur())
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -1,7 +1,9 @@
-// This package is handling the printing, terminal functionality, and user input.
-package app
+/*
+This package is handling the printing, terminal functionality, and user input.
 
-// partially nspired by https://github.com/nsf/termbox-go/blob/master/_demos/editbox.go
+Partially inspired by https://github.com/nsf/termbox-go/blob/master/_demos/editbox.go
+*/
+package app
 
 import (
 	"fmt"
@@ -42,7 +44,7 @@ func maxInt(a, b int) int {
 
 func drawFrame(app *App) {
 	// top line
-	draw(0, 0, coldef, coldef, app.dir.Path.Cur())
+	draw(0, 0, coldef, coldef, app.path.Cur())
 	// bottom line
 	coordStr := fmt.Sprintf("(%d)", app.index)
 	draw(app.layout.xEnd-len(coordStr)+1, app.layout.yEnd, coldef, coldef, coordStr)
@@ -50,12 +52,12 @@ func drawFrame(app *App) {
 }
 
 func drawWindow(app *App) {
-	for i, f := range app.dir.Files {
+	for i, f := range app.dir.Files() {
 		drawFile(0, 0+app.layout.topPad+i, i == app.index, f)
 	}
 }
 
-// main object managing the app functionality and display
+// Main object managing the app functionality and display.
 type App struct {
 	path     *fst.Path
 	dir      *fst.Directory
@@ -64,29 +66,54 @@ type App struct {
 	maxIndex int
 }
 
-func InitApp() *App {
-	app := new(App)
-	app.path = fst.InitPath()
-	app.dir = fst.NewDirectory(app.path)
-	app.layout = NewLayout()
-	app.index = 0
-	app.maxIndex = len(app.dir.Files)
-	return app
+func (app *App) Index() int {
+	return app.index
 }
 
-func (app *App) IncrementIndex(change int) {
+func (app *App) AddIndex(change int) {
 	app.index = minInt(maxInt(app.index+change, 0), app.maxIndex)
+}
+
+func (app *App) ResetIndex() {
+	app.index = 0
+}
+
+// Move to the current parent.
+func (app *App) Ascend() {
+	app.path.Set(app.path.Parent())
+	app.dir = fst.NewDirectory(app.path) // this shouldn't be a whole new object
+	app.ResetIndex()
+}
+
+// Move to the current selection if it's a directory, otherwise do nothing.
+func (app *App) Descend() {
+	f := app.dir.File(app.index)
+	if f.IsDir {
+		app.path.Set(fp.Join(app.path.Cur(), f.Name))
+		app.dir = fst.NewDirectory(app.path)
+		app.ResetIndex()
+	} // else do nothing
 }
 
 func (app *App) Refresh() {
 	termbox.Clear(coldef, coldef) // reset
 
-	app.maxIndex = len(app.dir.Files) - 1 // update num files
+	app.maxIndex = app.dir.Size() - 1 // update num files
 
 	drawFrame(app)
 	drawWindow(app) // main content
 
 	termbox.Flush() // clean
+}
+
+func InitApp() *App {
+	app := new(App)
+	app.path = fst.InitPath() // init at cwd
+	app.dir = fst.NewDirectory(app.path)
+	app.layout = NewLayout()
+	app.index = 0
+	app.maxIndex = app.dir.Size() - 1
+	return app
 }
 
 // Main program loop and user interactions
@@ -113,20 +140,13 @@ loop:
 			case termbox.KeyEsc, termbox.KeyCtrlC:
 				break loop
 			case termbox.KeyArrowDown:
-				app.IncrementIndex(1)
+				app.AddIndex(1)
 			case termbox.KeyArrowUp:
-				app.IncrementIndex(-1)
+				app.AddIndex(-1)
 			case termbox.KeyArrowLeft:
-				app.path.Set(app.path.Parent())
-				app.dir = fst.NewDirectory(app.path) // this shouldn't be a whole new object
-				app.index = 0
+				app.Ascend()
 			case termbox.KeyArrowRight:
-				sel := app.dir.Files[app.index]
-				if sel.IsDir {
-					app.path.Set(fp.Join(app.path.Cur(), sel.Name))
-					app.dir = fst.NewDirectory(app.path)
-					app.index = 0
-				}
+				app.Descend()
 			}
 		case termbox.EventError:
 			log.Fatal(ev.Err) // os.Exit(1) follows

@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-func getFiles(p *Path) []*File {
+func readFiles(p *Path) []*File {
 	rawFiles, err := os.ReadDir(p.Cur())
 	if err != nil {
 		log.Fatal(err)
@@ -20,13 +20,26 @@ func getFiles(p *Path) []*File {
 }
 
 type Directory struct {
-	Path  *Path
-	Files []*File
+	files []*File
+}
+
+func (d *Directory) File(i int) *File {
+	if i < 0 || i >= len(d.files) {
+		log.Fatal("Requested a file from index that doesn't exist")
+	}
+	return d.files[i]
+}
+
+func (d *Directory) Files() []*File {
+	return d.files
+}
+
+func (d *Directory) Size() int {
+	return len(d.files)
 }
 
 func NewDirectory(p *Path) *Directory {
 	d := new(Directory)
-	d.Path = p
-	d.Files = getFiles(p)
+	d.files = readFiles(p)
 	return d
 }

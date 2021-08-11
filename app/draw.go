@@ -1,5 +1,5 @@
 // should store formatted strings so they don't need to be processed each refresh
-package ui
+package app
 
 import (
 	"fmt"

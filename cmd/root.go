@@ -19,7 +19,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/joypauls/scry/ui"
+	"github.com/joypauls/scry/app"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -29,14 +29,17 @@ var cfgFile string
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "scry",
-	Short: "A tool to help you navigate your file system",
-	Long: `Scry CLI     
-___________________________           
-    ___  ___ _ __ _   _   
-   / __|/ __| '__| | | |  
-   \__ \ (__| |  | |_| |  
-   |___/\___|_|   \__, |  
-__________________|___/ ___
+	Short: "A CLI tool to interactively navigate your file system",
+	Long: `
+_________________________
+   ___  ___ _ __ _   _    
+  / __|/ __| '__| | | |   
+  \__ \ (__| |  | |_| |   
+  |___/\___|_|   \__, |   
+_________________|___/ __
+
+Copyright © 2021 Joy Paulsen
+Licensed under the Apache License, Version 2.0
 
 Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
@@ -44,7 +47,7 @@ to quickly create a Cobra application.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
-		ui.Run()
+		app.Run()
 	},
 }
 

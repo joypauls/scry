@@ -6,21 +6,27 @@ import (
 
 // Managing the UI layout
 type Layout struct {
-	width     int
-	height    int
-	xEnd      int
-	yEnd      int
-	topPad    int
-	bottomPad int
+	width        int
+	height       int
+	xStart       int
+	xEnd         int
+	yStart       int
+	yEnd         int
+	topPad       int
+	bottomPad    int
+	windowHeight int // equals the # of available lines
 }
 
 // generator func for Layout
 func NewLayout() *Layout {
 	f := new(Layout)
 	f.width, f.height = termbox.Size()
+	f.xStart = 0
 	f.xEnd = f.width - 1
-	f.yEnd = f.height - 1
 	f.topPad = 2
 	f.bottomPad = 2
+	f.yStart = 0 + f.topPad
+	f.yEnd = f.height - 1 - f.bottomPad
+	f.windowHeight = f.yEnd - f.yStart + 1
 	return f
 }

@@ -48,12 +48,17 @@ func drawFrame(app *App) {
 	// bottom line
 	coordStr := fmt.Sprintf("(%d)", app.index)
 	draw(app.layout.xEnd-len(coordStr)+1, app.layout.yEnd, coldef, coldef, coordStr)
-	draw(0, app.layout.yEnd, coldef, coldef, "[ESC] quit, [h] help")
+	draw(0, app.layout.height-1, coldef, coldef, "[ESC] quit, [h] help")
 }
 
 func drawWindow(app *App) {
 	for i, f := range app.dir.Files() {
-		drawFile(0, 0+app.layout.topPad+i, i == app.index, &f)
+		// window capacity is windowHeight
+		if i < app.layout.windowHeight {
+			drawFile(0, 0+app.layout.topPad+i, i == app.index, &f)
+		} else {
+			break
+		}
 	}
 }
 

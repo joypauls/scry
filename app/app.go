@@ -53,7 +53,7 @@ func drawFrame(app *App) {
 
 func drawWindow(app *App) {
 	for i, f := range app.dir.Files() {
-		drawFile(0, 0+app.layout.topPad+i, i == app.index, f)
+		drawFile(0, 0+app.layout.topPad+i, i == app.index, &f)
 	}
 }
 
@@ -79,14 +79,14 @@ func (app *App) ResetIndex() {
 }
 
 // Move to the current parent.
-func (app *App) Ascend() {
+func (app *App) GoToParent() {
 	app.path.Set(app.path.Parent())
 	app.dir = fst.NewDirectory(app.path) // this shouldn't be a whole new object
 	app.ResetIndex()
 }
 
 // Move to the current selection if it's a directory, otherwise do nothing.
-func (app *App) Descend() {
+func (app *App) GoToChild() {
 	f := app.dir.File(app.index)
 	if f.IsDir {
 		app.path.Set(fp.Join(app.path.Cur(), f.Name))
@@ -144,9 +144,9 @@ loop:
 			case termbox.KeyArrowUp:
 				app.AddIndex(-1)
 			case termbox.KeyArrowLeft:
-				app.Ascend()
+				app.GoToParent()
 			case termbox.KeyArrowRight:
-				app.Descend()
+				app.GoToChild()
 			}
 		case termbox.EventError:
 			log.Fatal(ev.Err) // os.Exit(1) follows

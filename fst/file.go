@@ -17,8 +17,8 @@ type File struct {
 	Perm  fs.FileMode
 }
 
-func NewFile(d os.DirEntry) *File {
-	f := new(File) // new pointer to a File
+func MakeFile(d os.DirEntry) File {
+	var f File
 	f.Name = d.Name()
 	f.IsDir = d.IsDir()
 	fi, err := d.Info() // FileInfo

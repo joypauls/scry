@@ -59,7 +59,7 @@ func drawWindow(app *App) {
 			app.layout.xStart,
 			app.layout.yStart+i,
 			i == app.index,
-			app.dir.File(i+app.head),
+			app.dir.File(i+app.offset),
 		)
 	}
 }
@@ -71,7 +71,7 @@ type App struct {
 	layout   *Layout
 	index    int // 0 <= index < maxIndex
 	maxIndex int
-	head     int // start of window
+	offset   int // start of window
 	// tail     int // end of window
 }
 
@@ -87,7 +87,7 @@ func (app *App) ResetIndex() {
 	app.index = 0
 }
 
-// func (app *App) MoveWindow(change int) {
+// func (app *App) Scroll(change int) {
 // 	app.offset = minInt(maxInt(app.index+change, 0), app.maxIndex)
 // }
 
@@ -96,18 +96,24 @@ func (app *App) GoToParent() {
 	app.path.Set(app.path.Parent())
 	app.dir = fst.NewDirectory(app.path) // this shouldn't be a whole new object
 	app.ResetIndex()
-	app.head = 0
+	app.offset = 0
 }
 
 // Move to the current selection if it's a directory, otherwise do nothing.
 func (app *App) GoToChild() {
-	f := app.dir.File(app.index)
+	f := app.dir.File(app.index + app.offset) // pointer to a File
 	if f.IsDir {
 		app.path.Set(fp.Join(app.path.Cur(), f.Name))
 		app.dir = fst.NewDirectory(app.path)
 		app.ResetIndex()
-		app.head = 0
+		app.offset = 0
 	} // else do nothing
+}
+
+// this should handle all drawing on the screen
+func (app *App) Draw() {
+	drawFrame(app)
+	drawWindow(app)
 }
 
 func (app *App) Refresh() {
@@ -115,8 +121,7 @@ func (app *App) Refresh() {
 
 	app.maxIndex = minInt(app.layout.windowHeight-1, app.dir.Size()-1)
 
-	drawFrame(app)
-	drawWindow(app) // main content
+	app.Draw()
 
 	termbox.Flush() // clean
 }
@@ -128,7 +133,7 @@ func NewApp() *App {
 	app.layout = NewLayout()
 	app.index = 0
 	app.maxIndex = minInt(app.layout.windowHeight-1, app.dir.Size()-1)
-	app.head = 0
+	app.offset = 0
 	// app.tail = app.maxIndex
 	return app
 }
@@ -160,15 +165,21 @@ loop:
 			case termbox.KeyArrowDown:
 				// handle scrolling down
 				if app.index == app.maxIndex {
-					if app.maxIndex+app.head+1 < app.dir.Size() {
-						app.head++
+					if app.maxIndex+app.offset+1 < app.dir.Size() {
+						// keep index the same! (at bottom)
+						app.offset++
 					}
-					// keep index the same (at bottom)
 				} else {
 					app.AddIndex(1)
 				}
 			case termbox.KeyArrowUp:
-				app.AddIndex(-1)
+				// handle scrolling up
+				if app.index == 0 && app.offset > 0 {
+					// keep index the same (at top)
+					app.offset--
+				} else {
+					app.AddIndex(-1)
+				}
 			case termbox.KeyArrowLeft:
 				app.GoToParent()
 			case termbox.KeyArrowRight:

@@ -15,8 +15,8 @@ limitations under the License.
 */
 package main
 
-import "github.com/joypauls/scry/cmd"
+import "github.com/joypauls/scry/app"
 
 func main() {
-	cmd.Execute()
+	app.Run()
 }

@@ -12,8 +12,8 @@ type Layout struct {
 	xEnd         int
 	yStart       int
 	yEnd         int
-	topPad       int
-	bottomPad    int
+	topPad       int // min val for this is 2
+	bottomPad    int // min val for this is 2
 	windowHeight int // equals the # of available lines
 }
 

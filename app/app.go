@@ -15,9 +15,12 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
+// this global config sucks let's get rid of it
 const coldef = termbox.ColorDefault // termbox.Attribute
 var arrowLeft = '←'
 var arrowRight = '→'
+var arrowUp = '▲'
+var arrowDown = '▼'
 
 // initialize one time display-related configs at program start
 // this could probably be a configuration struct
@@ -42,6 +45,7 @@ func maxInt(a, b int) int {
 	return b
 }
 
+// draw stuff that is not file content
 func drawFrame(app *App) {
 	// top line
 	draw(0, 0, coldef, coldef, app.path.Cur())
@@ -51,6 +55,7 @@ func drawFrame(app *App) {
 	draw(0, app.layout.height-1, coldef, coldef, "[ESC] quit, [h] help")
 }
 
+// fraw file content
 func drawWindow(app *App) {
 	// put check for empty here
 	limit := minInt(app.layout.windowHeight, app.maxIndex)

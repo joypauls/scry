@@ -52,13 +52,15 @@ func drawFrame(app *App) {
 }
 
 func drawWindow(app *App) {
-	for i, f := range app.dir.Files() {
-		// window capacity is windowHeight
-		if i < app.layout.windowHeight {
-			drawFile(0, 0+app.layout.topPad+i, i == app.index, &f)
-		} else {
-			break
-		}
+	// put check for empty here
+	limit := minInt(app.layout.windowHeight, app.maxIndex)
+	for i := 0; i <= limit; i++ {
+		drawFile(
+			app.layout.xStart,
+			app.layout.yStart+i,
+			i == app.index,
+			app.dir.File(i+app.head),
+		)
 	}
 }
 
@@ -67,8 +69,10 @@ type App struct {
 	path     *fst.Path
 	dir      *fst.Directory
 	layout   *Layout
-	index    int
+	index    int // 0 <= index < maxIndex
 	maxIndex int
+	head     int // start of window
+	// tail     int // end of window
 }
 
 func (app *App) Index() int {
@@ -83,11 +87,16 @@ func (app *App) ResetIndex() {
 	app.index = 0
 }
 
+// func (app *App) MoveWindow(change int) {
+// 	app.offset = minInt(maxInt(app.index+change, 0), app.maxIndex)
+// }
+
 // Move to the current parent.
 func (app *App) GoToParent() {
 	app.path.Set(app.path.Parent())
 	app.dir = fst.NewDirectory(app.path) // this shouldn't be a whole new object
 	app.ResetIndex()
+	app.head = 0
 }
 
 // Move to the current selection if it's a directory, otherwise do nothing.
@@ -97,13 +106,14 @@ func (app *App) GoToChild() {
 		app.path.Set(fp.Join(app.path.Cur(), f.Name))
 		app.dir = fst.NewDirectory(app.path)
 		app.ResetIndex()
+		app.head = 0
 	} // else do nothing
 }
 
 func (app *App) Refresh() {
 	termbox.Clear(coldef, coldef) // reset
 
-	app.maxIndex = app.dir.Size() - 1 // update num files
+	app.maxIndex = minInt(app.layout.windowHeight-1, app.dir.Size()-1)
 
 	drawFrame(app)
 	drawWindow(app) // main content
@@ -111,18 +121,21 @@ func (app *App) Refresh() {
 	termbox.Flush() // clean
 }
 
-func InitApp() *App {
+func NewApp() *App {
 	app := new(App)
 	app.path = fst.InitPath() // init at cwd
 	app.dir = fst.NewDirectory(app.path)
 	app.layout = NewLayout()
 	app.index = 0
-	app.maxIndex = app.dir.Size() - 1
+	app.maxIndex = minInt(app.layout.windowHeight-1, app.dir.Size()-1)
+	app.head = 0
+	// app.tail = app.maxIndex
 	return app
 }
 
 // Main program loop and user interactions
 func Run() {
+	// setting up
 	err := termbox.Init()
 	if err != nil {
 		panic(err)
@@ -130,11 +143,11 @@ func Run() {
 	defer termbox.Close()
 	termbox.SetInputMode(termbox.InputEsc)
 
-	config()
+	config() // make this not use global shit
 
-	app := InitApp()
+	app := NewApp() // init
 
-	// draw the UI for the first time
+	// draw the ui for the first time
 	app.Refresh()
 
 loop:
@@ -145,7 +158,15 @@ loop:
 			case termbox.KeyEsc, termbox.KeyCtrlC:
 				break loop
 			case termbox.KeyArrowDown:
-				app.AddIndex(1)
+				// handle scrolling down
+				if app.index == app.maxIndex {
+					if app.maxIndex+app.head+1 < app.dir.Size() {
+						app.head++
+					}
+					// keep index the same (at bottom)
+				} else {
+					app.AddIndex(1)
+				}
 			case termbox.KeyArrowUp:
 				app.AddIndex(-1)
 			case termbox.KeyArrowLeft:
@@ -157,6 +178,7 @@ loop:
 			log.Fatal(ev.Err) // os.Exit(1) follows
 		}
 
+		// draw after (potential) changes
 		app.Refresh()
 	}
 }

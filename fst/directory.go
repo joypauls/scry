@@ -42,6 +42,10 @@ func (d *Directory) Size() int {
 	return d.size
 }
 
+func (d *Directory) IsEmpty() bool {
+	return d.size == 0
+}
+
 func NewDirectory(p *Path) *Directory {
 	d := new(Directory)
 	d.files = readFiles(p)

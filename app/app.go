@@ -67,12 +67,12 @@ func drawWindow(app *App) {
 // Main object managing the app functionality and display.
 type App struct {
 	path     *fst.Path
+	home     *fst.Path
 	dir      *fst.Directory
 	layout   *Layout
 	index    int // 0 <= index < maxIndex
 	maxIndex int
 	offset   int // start of window
-	// tail     int // end of window
 }
 
 func (app *App) Index() int {
@@ -80,11 +80,19 @@ func (app *App) Index() int {
 }
 
 func (app *App) AddIndex(change int) {
-	app.index = minInt(maxInt(app.index+change, 0), app.maxIndex)
+	// meeting this condition means that there cur dir is empty
+	if app.index != 0 || app.maxIndex != 0 {
+		app.index = minInt(maxInt(app.index+change, 0), app.maxIndex)
+	}
 }
 
 func (app *App) ResetIndex() {
 	app.index = 0
+	if app.dir.IsEmpty() {
+		app.maxIndex = 0
+	} else {
+		app.maxIndex = minInt(app.layout.windowHeight-1, app.dir.Size()-1)
+	}
 }
 
 // func (app *App) Scroll(change int) {
@@ -101,40 +109,42 @@ func (app *App) GoToParent() {
 
 // Move to the current selection if it's a directory, otherwise do nothing.
 func (app *App) GoToChild() {
-	f := app.dir.File(app.index + app.offset) // pointer to a File
-	if f.IsDir {
-		app.path.Set(fp.Join(app.path.Cur(), f.Name))
-		app.dir = fst.NewDirectory(app.path)
-		app.ResetIndex()
-		app.offset = 0
-	} // else do nothing
+	if !app.dir.IsEmpty() {
+		f := app.dir.File(app.index + app.offset) // pointer to a File
+		if f.IsDir {
+			app.path.Set(fp.Join(app.path.Cur(), f.Name))
+			app.dir = fst.NewDirectory(app.path)
+			app.ResetIndex()
+			app.offset = 0
+		} // else do nothing
+	}
 }
 
 // this should handle all drawing on the screen
 func (app *App) Draw() {
 	drawFrame(app)
-	drawWindow(app)
+	if app.dir.IsEmpty() {
+		draw(app.layout.xStart, app.layout.yStart, coldef, coldef, "<EMPTY>")
+	} else {
+		drawWindow(app)
+	}
 }
 
 func (app *App) Refresh() {
 	termbox.Clear(coldef, coldef) // reset
-
-	app.maxIndex = minInt(app.layout.windowHeight-1, app.dir.Size()-1)
-
 	app.Draw()
-
 	termbox.Flush() // clean
 }
 
 func NewApp() *App {
 	app := new(App)
 	app.path = fst.InitPath() // init at cwd
+	app.home = fst.InitPath() // could do a deep copy but it's cheap so meh
 	app.dir = fst.NewDirectory(app.path)
 	app.layout = NewLayout()
 	app.index = 0
 	app.maxIndex = minInt(app.layout.windowHeight-1, app.dir.Size()-1)
 	app.offset = 0
-	// app.tail = app.maxIndex
 	return app
 }
 
@@ -151,7 +161,6 @@ func Run() {
 	config() // make this not use global shit
 
 	app := NewApp() // init
-
 	// draw the ui for the first time
 	app.Refresh()
 

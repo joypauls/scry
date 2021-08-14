@@ -2,4 +2,5 @@
 
 # scry :crystal_ball:
 
-A CLI tool written in Go to explore a file system - intended to be somewhere between `ls` and a full-featured GUI file manager.
+A CLI tool written in Go to **quickly** explore a *nix file system with **minimal keystrokes** so it can keep up with your thoughts. Intended to exist in the space somewhere between `ls` and a full-featured GUI file manager.
+

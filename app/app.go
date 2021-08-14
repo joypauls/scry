@@ -47,7 +47,7 @@ func drawFrame(app *App) {
 	draw(0, 0, coldef, coldef, app.path.Cur())
 	// bottom line
 	coordStr := fmt.Sprintf("(%d)", app.index)
-	draw(app.layout.xEnd-len(coordStr)+1, app.layout.yEnd, coldef, coldef, coordStr)
+	draw(app.layout.xEnd-len(coordStr)+1, app.layout.height-1, coldef, coldef, coordStr)
 	draw(0, app.layout.height-1, coldef, coldef, "[ESC] quit, [h] help")
 }
 

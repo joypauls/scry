@@ -4,9 +4,9 @@ package app
 import (
 	"fmt"
 
+	"github.com/gdamore/tcell/v2"
 	"github.com/joypauls/scry/fst"
 	"github.com/mattn/go-runewidth"
-	"github.com/nsf/termbox-go"
 )
 
 // SI defined base for multiple byte units
@@ -35,20 +35,18 @@ func humanizeBytes(bytes int64) string {
 	)
 }
 
-// Uses termbox specific functionality to display a string in cells.
-func draw(x, y int, fg, bg termbox.Attribute, s string) {
-	for _, c := range s {
-		termbox.SetCell(x, y, c, fg, bg)
-		x += runewidth.RuneWidth(c)
+// Uses tcell specific functionality to display a string in cells.
+func draw(s tcell.Screen, x, y int, style tcell.Style, text string) {
+	for _, r := range []rune(text) {
+		s.SetContent(x, y, r, nil, style)
+		x += runewidth.RuneWidth(r)
 	}
 }
 
-func drawFile(x, y int, selected bool, f *fst.File) {
-	fg := coldef
-	bg := coldef
+func drawFile(s tcell.Screen, x, y int, selected bool, f *fst.File) {
+	style := defStyle
 	if selected {
-		fg = termbox.ColorBlack
-		bg = termbox.ColorCyan
+		style = selStyle
 	}
 	label := fileLabel
 	if f.IsDir {
@@ -61,5 +59,5 @@ func drawFile(x, y int, selected bool, f *fst.File) {
 		humanizeBytes(f.Size),
 		f.Name,
 	)
-	draw(x, y, fg, bg, line)
+	draw(s, x, y, style, line)
 }

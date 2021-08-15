@@ -1,22 +1,28 @@
 /*
-This package is handling the printing, terminal functionality, and user input.
+The app package handles the main application logic.
 
-Partially inspired by https://github.com/nsf/termbox-go/blob/master/_demos/editbox.go
+Partially inspired by:
+	https://github.com/nsf/termbox-go/blob/master/_demos/editbox.go
+	https://github.com/gdamore/tcell/blob/master/TUTORIAL.md
 */
 package app
 
 import (
 	"fmt"
 	"log"
+	"os"
 	fp "path/filepath"
 
+	"github.com/gdamore/tcell/v2"
 	"github.com/joypauls/scry/fst"
 	"github.com/mattn/go-runewidth"
-	"github.com/nsf/termbox-go"
 )
 
+// Set default text style
+
 // this global config sucks let's get rid of it
-const coldef = termbox.ColorDefault // termbox.Attribute
+var defStyle = tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorReset)
+var selStyle = tcell.StyleDefault.Foreground(tcell.ColorWhite).Background(tcell.ColorPurple)
 var arrowLeft = '←'
 var arrowRight = '→'
 var arrowUp = '▲'
@@ -46,27 +52,28 @@ func maxInt(a, b int) int {
 }
 
 // draw stuff that is not file content
-func drawFrame(app *App) {
+func drawFrame(s tcell.Screen, app *App) {
 	// top line
-	draw(0, 0, coldef, coldef, app.path.String())
+	// draw(0, 0, coldef, coldef, app.path.String())
+	draw(s, 0, 0, defStyle, app.path.String())
 	if app.offset > 0 {
-		draw(0, 1, coldef, coldef, fmt.Sprintf("%c", arrowUp))
+		draw(s, 0, 1, defStyle, fmt.Sprintf("%c", arrowUp))
 	}
 	if app.maxIndex+app.offset+1 < app.Size() {
-		draw(0, app.height-2, coldef, coldef, fmt.Sprintf("%c", arrowDown))
+		draw(s, 0, app.height-2, defStyle, fmt.Sprintf("%c", arrowDown))
 	}
 	// bottom line
 	coordStr := fmt.Sprintf("(%d)", app.index)
-	draw(app.xEnd-len(coordStr)+1, app.height-1, coldef, coldef, coordStr)
-	draw(0, app.height-1, coldef, coldef, "[ESC] quit, [h] help")
+	draw(s, app.xEnd-len(coordStr)+1, app.height-1, defStyle, coordStr)
+	draw(s, 0, app.height-1, defStyle, "[ESC] quit, [h] help")
 }
 
-// fraw file content
-func drawWindow(app *App) {
-	// put check for empty here
+// Actual file contents
+func drawWindow(s tcell.Screen, app *App) {
 	limit := minInt(app.windowHeight, app.maxIndex)
 	for i := 0; i <= limit; i++ {
 		drawFile(
+			s,
 			app.xStart,
 			app.yStart+i,
 			i == app.index,
@@ -128,23 +135,23 @@ func (app *App) GoToChild() {
 }
 
 // this should handle all drawing on the screen
-func (app *App) Draw() {
-	drawFrame(app)
+func (app *App) Draw(s tcell.Screen) {
+	drawFrame(s, app)
 	if app.IsEmpty() {
-		draw(app.xStart, app.yStart, coldef, coldef, "<EMPTY>")
+		draw(s, app.xStart, app.yStart, defStyle, "<EMPTY>")
 	} else {
-		drawWindow(app)
+		drawWindow(s, app)
 	}
 }
 
-func (app *App) Refresh() {
-	termbox.Clear(coldef, coldef) // reset
-	app.Draw()
-	termbox.Flush() // clean
+func (app *App) Refresh(s tcell.Screen) {
+	s.Clear()
+	app.Draw(s)
 }
 
-func NewApp() *App {
-	app := &App{Layout: MakeLayout(), Directory: fst.NewDirectory(fst.NewPath())}
+func NewApp(s tcell.Screen) *App {
+	w, h := s.Size()
+	app := &App{Layout: MakeLayout(w, h), Directory: fst.NewDirectory(fst.NewPath())}
 	app.path = fst.NewPath() // init at wd
 	app.home = fst.NewPath() // could do a deep copy but it's cheap so meh
 	app.index = 0
@@ -155,28 +162,47 @@ func NewApp() *App {
 
 // Main program loop and user interactions
 func Run() {
-	// setting up
-	err := termbox.Init()
+	// // setting up
+	// err := termbox.Init()
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// defer termbox.Close()
+	// termbox.SetInputMode(termbox.InputEsc)
+
+	s, err := tcell.NewScreen()
 	if err != nil {
-		panic(err)
+		log.Fatalf("%+v", err)
 	}
-	defer termbox.Close()
-	termbox.SetInputMode(termbox.InputEsc)
+	if err := s.Init(); err != nil {
+		log.Fatalf("%+v", err)
+	}
+	s.SetStyle(defStyle)
+	s.Clear()
 
 	config() // make this not use global shit
 
-	app := NewApp() // init
+	app := NewApp(s) // init
 	// draw the ui for the first time
-	app.Refresh()
+	app.Refresh(s)
 
-loop:
+	quit := func() {
+		s.Fini()
+		os.Exit(0)
+	}
+
+	// loop:
 	for {
-		switch ev := termbox.PollEvent(); ev.Type {
-		case termbox.EventKey:
-			switch ev.Key {
-			case termbox.KeyEsc, termbox.KeyCtrlC:
-				break loop
-			case termbox.KeyArrowDown:
+		s.Show()            // Update screen
+		ev := s.PollEvent() // Poll event
+
+		switch ev := ev.(type) {
+		case *tcell.EventResize:
+			s.Sync()
+		case *tcell.EventKey:
+			if ev.Key() == tcell.KeyEscape || ev.Key() == tcell.KeyCtrlC {
+				quit()
+			} else if ev.Key() == tcell.KeyDown {
 				// handle scrolling down
 				if app.index == app.maxIndex {
 					if app.maxIndex+app.offset+1 < app.Size() {
@@ -186,7 +212,7 @@ loop:
 				} else {
 					app.AddIndex(1)
 				}
-			case termbox.KeyArrowUp:
+			} else if ev.Key() == tcell.KeyUp {
 				// handle scrolling up
 				if app.index == 0 && app.offset > 0 {
 					// keep index the same (at top)
@@ -194,16 +220,16 @@ loop:
 				} else {
 					app.AddIndex(-1)
 				}
-			case termbox.KeyArrowLeft:
+			} else if ev.Key() == tcell.KeyLeft {
 				app.GoToParent()
-			case termbox.KeyArrowRight:
+			} else if ev.Key() == tcell.KeyRight {
 				app.GoToChild()
 			}
-		case termbox.EventError:
-			log.Fatal(ev.Err) // os.Exit(1) follows
+		case *tcell.EventError:
+			// can we access the actual tcell error? idk
+			log.Fatal("Panic! At the Unknown Input") // os.Exit(1) follows log.Fatal()
 		}
-
 		// draw after (potential) changes
-		app.Refresh()
+		app.Refresh(s)
 	}
 }

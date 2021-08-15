@@ -1,9 +1,5 @@
 package app
 
-import (
-	"github.com/nsf/termbox-go"
-)
-
 // Managing the UI layout
 type Layout struct {
 	width        int
@@ -16,14 +12,14 @@ type Layout struct {
 }
 
 // constructor for Layout
-func MakeLayout() Layout {
+func MakeLayout(w, h int) Layout {
 	padding := 2 // min for this is 2
 	f := Layout{}
-	f.width, f.height = termbox.Size()
+	f.width, f.height = w, h
 	f.xStart = 0
-	f.xEnd = f.width - 1
+	f.xEnd = w - 1
 	f.yStart = 0 + padding
-	f.yEnd = f.height - 1 - padding
+	f.yEnd = h - 1 - padding
 	f.windowHeight = f.yEnd - f.yStart + 1
 	return f
 }

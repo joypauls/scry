@@ -12,21 +12,18 @@ type Layout struct {
 	xEnd         int
 	yStart       int
 	yEnd         int
-	topPad       int // min val for this is 2
-	bottomPad    int // min val for this is 2
 	windowHeight int // equals the # of available lines
 }
 
-// generator func for Layout
-func NewLayout() *Layout {
-	f := new(Layout)
+// constructor for Layout
+func MakeLayout() Layout {
+	padding := 2 // min for this is 2
+	f := Layout{}
 	f.width, f.height = termbox.Size()
 	f.xStart = 0
 	f.xEnd = f.width - 1
-	f.topPad = 2
-	f.bottomPad = 2
-	f.yStart = 0 + f.topPad
-	f.yEnd = f.height - 1 - f.bottomPad
+	f.yStart = 0 + padding
+	f.yEnd = f.height - 1 - padding
 	f.windowHeight = f.yEnd - f.yStart + 1
 	return f
 }

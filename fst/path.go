@@ -6,26 +6,29 @@ import (
 	fp "path/filepath"
 )
 
+/*
+Path's job is to stay nice and neat instead of hoping string
+is formatted properly.
+**/
 type Path struct {
-	cur    string
-	parent string
+	cur string
 }
 
 func (p *Path) Set(s string) {
 	p.cur = fp.Clean(s)
-	p.parent = fp.Dir(s)
 }
 
-func (p *Path) Cur() string {
+func (p *Path) String() string {
 	return p.cur
 }
 
+// should this return a Path??
 func (p *Path) Parent() string {
-	return p.parent
+	return fp.Dir(p.cur)
 }
 
 // right now only works for starting at current directory
-func InitPath() *Path {
+func NewPath() *Path {
 	p := new(Path)
 	cur, err := os.Getwd()
 	if err != nil {

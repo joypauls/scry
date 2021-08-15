@@ -9,7 +9,7 @@ import (
 )
 
 func readFiles(p *Path) []File {
-	rawFiles, err := os.ReadDir(p.Cur()) // DirEntry slice
+	rawFiles, err := os.ReadDir(p.String()) // DirEntry slice
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -21,6 +21,7 @@ func readFiles(p *Path) []File {
 	return files
 }
 
+// Directory{} should stay identical to reading an empty directory
 type Directory struct {
 	files []File
 	size  int
@@ -46,9 +47,13 @@ func (d *Directory) IsEmpty() bool {
 	return d.size == 0
 }
 
-func NewDirectory(p *Path) *Directory {
-	d := new(Directory)
+func (d *Directory) Read(p *Path) {
 	d.files = readFiles(p)
 	d.size = len(d.files)
+}
+
+func NewDirectory(p *Path) *Directory {
+	d := new(Directory)
+	d.Read(p)
 	return d
 }

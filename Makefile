@@ -6,3 +6,4 @@ build-small:
 
 run:
 	go run main.go
+

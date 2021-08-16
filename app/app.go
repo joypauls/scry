@@ -22,7 +22,7 @@ import (
 
 // this global config sucks let's get rid of it
 var defStyle = tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorReset)
-var selStyle = tcell.StyleDefault.Foreground(tcell.ColorWhite).Background(tcell.ColorPurple)
+var selStyle = tcell.StyleDefault.Foreground(tcell.ColorWhite).Background(tcell.ColorBlueViolet)
 var arrowLeft = '←'
 var arrowRight = '→'
 var arrowUp = '▲'
@@ -205,7 +205,10 @@ func Run() {
 			} else if ev.Key() == tcell.KeyDown {
 				// handle scrolling down
 				if app.index == app.maxIndex {
-					if app.maxIndex+app.offset+1 < app.Size() {
+					if app.maxIndex+app.offset == app.Size()-1 {
+						app.index = 0
+						app.offset = 0
+					} else if app.maxIndex+app.offset < app.Size()-1 {
 						// keep index the same! (at bottom)
 						app.offset++
 					}
@@ -214,9 +217,14 @@ func Run() {
 				}
 			} else if ev.Key() == tcell.KeyUp {
 				// handle scrolling up
-				if app.index == 0 && app.offset > 0 {
-					// keep index the same (at top)
-					app.offset--
+				if app.index == 0 {
+					if app.offset == 0 {
+						app.index = app.maxIndex
+						app.offset = (app.Size() - 1) - app.maxIndex
+					} else if app.offset > 0 {
+						// keep index the same (at top)
+						app.offset--
+					}
 				} else {
 					app.AddIndex(-1)
 				}

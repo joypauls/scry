@@ -7,3 +7,7 @@ build-small:
 run:
 	go run main.go
 
+dev:
+	build
+	sh ./dev-install.sh
+

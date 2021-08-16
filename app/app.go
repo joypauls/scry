@@ -55,7 +55,11 @@ func maxInt(a, b int) int {
 func drawFrame(s tcell.Screen, app *App) {
 	// top line
 	// draw(0, 0, coldef, coldef, app.path.String())
-	draw(s, 0, 0, defStyle, app.path.String())
+	header := app.path.String()
+	if app.useEmoji {
+		header = "🔮 " + header
+	}
+	draw(s, 0, 0, defStyle, header)
 	if app.offset > 0 {
 		draw(s, 0, 1, defStyle, fmt.Sprintf("%c", arrowUp))
 	}
@@ -91,6 +95,7 @@ type App struct {
 	index    int // 0 <= index < maxIndex
 	maxIndex int
 	offset   int // start of window
+	useEmoji bool
 }
 
 func (app *App) Index() int {
@@ -149,7 +154,7 @@ func (app *App) Refresh(s tcell.Screen) {
 	app.Draw(s)
 }
 
-func NewApp(s tcell.Screen) *App {
+func NewApp(s tcell.Screen, useEmoji bool) *App {
 	w, h := s.Size()
 	app := &App{Layout: MakeLayout(w, h), Directory: fst.NewDirectory(fst.NewPath())}
 	app.path = fst.NewPath() // init at wd
@@ -157,19 +162,12 @@ func NewApp(s tcell.Screen) *App {
 	app.index = 0
 	app.maxIndex = minInt(app.windowHeight-1, app.Size()-1)
 	app.offset = 0
+	app.useEmoji = useEmoji
 	return app
 }
 
 // Main program loop and user interactions
-func Run() {
-	// // setting up
-	// err := termbox.Init()
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// defer termbox.Close()
-	// termbox.SetInputMode(termbox.InputEsc)
-
+func Run(useEmoji bool) {
 	s, err := tcell.NewScreen()
 	if err != nil {
 		log.Fatalf("%+v", err)
@@ -182,7 +180,7 @@ func Run() {
 
 	config() // make this not use global shit
 
-	app := NewApp(s) // init
+	app := NewApp(s, useEmoji) // init
 	// draw the ui for the first time
 	app.Refresh(s)
 

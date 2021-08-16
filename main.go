@@ -1,7 +1,14 @@
 package main
 
-import "github.com/joypauls/scry/app"
+import (
+	"flag"
+
+	"github.com/joypauls/scry/app"
+)
 
 func main() {
-	app.Run()
+	// pointer to a bool
+	useEmoji := flag.Bool("e", false, "Use emoji in UI (sparingly)")
+	flag.Parse()
+	app.Run(*useEmoji)
 }

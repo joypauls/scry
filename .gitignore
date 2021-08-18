@@ -1,8 +1,8 @@
 # project-specific
 scry
 _*
-./bin/sy
-./bin/scry
+bin/sy
+bin/scry
 _link
 
 # Binaries for programs and plugins

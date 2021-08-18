@@ -168,7 +168,7 @@ func NewApp(s tcell.Screen, useEmoji bool) *App {
 }
 
 // Main program loop and user interactions
-func Run(useEmoji bool) {
+func Run(c Config) {
 	s, err := tcell.NewScreen()
 	if err != nil {
 		log.Fatalf("%+v", err)
@@ -181,7 +181,7 @@ func Run(useEmoji bool) {
 
 	config() // make this not use global shit
 
-	app := NewApp(s, useEmoji) // init
+	app := NewApp(s, c.UseEmoji) // init
 	// draw the ui for the first time
 	app.Refresh(s)
 

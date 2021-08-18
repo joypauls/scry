@@ -1,6 +1,8 @@
 # project-specific
 scry
 _*
+./bin/sy
+./bin/scry
 
 # Binaries for programs and plugins
 *.exe

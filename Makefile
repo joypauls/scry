@@ -1,8 +1,8 @@
 build:
-	go build
+	go build -o /bin/scry
 
 build-small:
-	go build -ldflags="-s -w"
+	go build -ldflags="-s -w" -o /bin/scry
 
 run:
 	go run main.go

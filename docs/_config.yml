@@ -1,1 +1,5 @@
 theme: jekyll-theme-midnight
+title: Scry CLI
+subtitle: 
+description: A command line tool for exploring your file system.
+show_downloads: true

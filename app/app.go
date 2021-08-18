@@ -82,6 +82,7 @@ func drawWindow(s tcell.Screen, app *App) {
 			app.yStart+i,
 			i == app.index,
 			app.File(i+app.offset),
+			*app.path,
 		)
 	}
 }

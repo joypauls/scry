@@ -3,6 +3,8 @@ package app
 
 import (
 	"fmt"
+	"os"
+	fp "path/filepath"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/joypauls/scry/fst"
@@ -16,6 +18,8 @@ const prefixSI = "kMGTPE"
 // symbols for display
 const dirLabel = "📁"
 const fileLabel = "  "
+
+// const otherLabel = "  "
 
 // Converts an integer number of bytes to SI units.
 func humanizeBytes(bytes int64) string {
@@ -43,7 +47,7 @@ func draw(s tcell.Screen, x, y int, style tcell.Style, text string) {
 	}
 }
 
-func drawFile(s tcell.Screen, x, y int, selected bool, f *fst.File) {
+func drawFile(s tcell.Screen, x, y int, selected bool, f *fst.File, p fst.Path) {
 	style := defStyle
 	if selected {
 		style = selStyle
@@ -52,12 +56,21 @@ func drawFile(s tcell.Screen, x, y int, selected bool, f *fst.File) {
 	if f.IsDir {
 		label = dirLabel
 	}
+	name := f.Name
+	// check for symlink
+	if f.IsSymLink() {
+		target, err := os.Readlink(fp.Join(p.String(), name))
+		if err != nil {
+			target = "?"
+		}
+		name = name + fmt.Sprintf(" %c %s", arrowRight, target)
+	}
 	line := fmt.Sprintf("%s  %-4s  %#-4o  %-9s  %s ",
 		label,
 		fmt.Sprintf("%02d-%02d-%d", f.Time.Month(), f.Time.Day(), f.Time.Year()%100),
 		f.Perm,
 		humanizeBytes(f.Size),
-		f.Name,
+		name,
 	)
 	draw(s, x, y, style, line)
 }

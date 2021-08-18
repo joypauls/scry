@@ -11,3 +11,5 @@ dev:
 	build
 	sh ./dev-install.sh
 
+clean:
+	go mod tidy

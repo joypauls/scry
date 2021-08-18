@@ -12,3 +12,6 @@ dev:
 
 clean:
 	go mod tidy
+
+serve-docs:
+	bundle exec jekyll serve

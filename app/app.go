@@ -91,12 +91,13 @@ func drawWindow(s tcell.Screen, app *App) {
 type App struct {
 	Layout
 	*fst.Directory
-	path     *fst.Path
-	home     *fst.Path
-	index    int // 0 <= index < maxIndex
-	maxIndex int
-	offset   int // start of window
-	useEmoji bool
+	path         *fst.Path
+	home         *fst.Path
+	index        int // 0 <= index < maxIndex
+	maxIndex     int
+	offset       int // start of window
+	useEmoji     bool
+	ignoreHidden bool
 }
 
 func (app *App) Index() int {
@@ -122,7 +123,7 @@ func (app *App) ResetIndex() {
 // Move to the current parent.
 func (app *App) GoToParent() {
 	app.path.Set(app.path.Parent())
-	app.Read(app.path)
+	app.Read(app.path, app.ignoreHidden)
 	app.ResetIndex()
 	app.offset = 0
 }
@@ -133,7 +134,7 @@ func (app *App) GoToChild() {
 		f := app.File(app.index + app.offset) // pointer to a File
 		if f.IsDir {
 			app.path.Set(fp.Join(app.path.String(), f.Name))
-			app.Read(app.path)
+			app.Read(app.path, app.ignoreHidden)
 			app.ResetIndex()
 			app.offset = 0
 		} // else do nothing
@@ -155,15 +156,16 @@ func (app *App) Refresh(s tcell.Screen) {
 	app.Draw(s)
 }
 
-func NewApp(s tcell.Screen, useEmoji bool) *App {
+func NewApp(s tcell.Screen, c Config) *App {
 	w, h := s.Size()
-	app := &App{Layout: MakeLayout(w, h), Directory: fst.NewDirectory(fst.NewPath())}
+	app := &App{Layout: MakeLayout(w, h), Directory: fst.NewDirectory(fst.NewPath(), c.IgnoreHidden)}
 	app.path = fst.NewPath() // init at wd
 	app.home = fst.NewPath() // could do a deep copy but it's cheap so meh
 	app.index = 0
 	app.maxIndex = minInt(app.windowHeight-1, app.Size()-1)
 	app.offset = 0
-	app.useEmoji = useEmoji
+	app.useEmoji = c.UseEmoji
+	app.ignoreHidden = c.IgnoreHidden
 	return app
 }
 
@@ -181,7 +183,7 @@ func Run(c Config) {
 
 	config() // make this not use global shit
 
-	app := NewApp(s, c.UseEmoji) // init
+	app := NewApp(s, c) // init
 	// draw the ui for the first time
 	app.Refresh(s)
 

@@ -30,7 +30,7 @@ var arrowDown = '▼'
 
 // initialize one time display-related configs at program start
 // this could probably be a configuration struct
-func config() {
+func initVars() {
 	if runewidth.EastAsianWidth {
 		arrowLeft = '<'
 		arrowRight = '>'
@@ -56,7 +56,7 @@ func drawFrame(s tcell.Screen, app *App) {
 	// top line
 	// draw(0, 0, coldef, coldef, app.path.String())
 	header := app.path.String()
-	if app.useEmoji {
+	if app.UseEmoji {
 		header = "🔮 " + header
 	}
 	draw(s, 0, 0, defStyle, header)
@@ -91,13 +91,12 @@ func drawWindow(s tcell.Screen, app *App) {
 type App struct {
 	Layout
 	*fst.Directory
-	path         *fst.Path
-	home         *fst.Path
-	index        int // 0 <= index < maxIndex
-	maxIndex     int
-	offset       int // start of window
-	useEmoji     bool
-	ignoreHidden bool
+	Config
+	path     *fst.Path
+	home     *fst.Path
+	index    int // 0 <= index < maxIndex
+	maxIndex int
+	offset   int // start of window
 }
 
 func (app *App) Index() int {
@@ -123,7 +122,7 @@ func (app *App) ResetIndex() {
 // Move to the current parent.
 func (app *App) GoToParent() {
 	app.path.Set(app.path.Parent())
-	app.Read(app.path, app.ignoreHidden)
+	app.Read(app.path, app.ShowHidden)
 	app.ResetIndex()
 	app.offset = 0
 }
@@ -134,7 +133,7 @@ func (app *App) GoToChild() {
 		f := app.File(app.index + app.offset) // pointer to a File
 		if f.IsDir {
 			app.path.Set(fp.Join(app.path.String(), f.Name))
-			app.Read(app.path, app.ignoreHidden)
+			app.Read(app.path, app.ShowHidden)
 			app.ResetIndex()
 			app.offset = 0
 		} // else do nothing
@@ -158,14 +157,16 @@ func (app *App) Refresh(s tcell.Screen) {
 
 func NewApp(s tcell.Screen, c Config) *App {
 	w, h := s.Size()
-	app := &App{Layout: MakeLayout(w, h), Directory: fst.NewDirectory(fst.NewPath(), c.IgnoreHidden)}
+	app := &App{
+		Layout:    MakeLayout(w, h),
+		Directory: fst.NewDirectory(fst.NewPath(), c.ShowHidden),
+		Config:    c,
+	}
 	app.path = fst.NewPath() // init at wd
 	app.home = fst.NewPath() // could do a deep copy but it's cheap so meh
 	app.index = 0
 	app.maxIndex = minInt(app.windowHeight-1, app.Size()-1)
 	app.offset = 0
-	app.useEmoji = c.UseEmoji
-	app.ignoreHidden = c.IgnoreHidden
 	return app
 }
 
@@ -181,7 +182,7 @@ func Run(c Config) {
 	s.SetStyle(defStyle)
 	s.Clear()
 
-	config() // make this not use global shit
+	initVars() // make this not use global shit
 
 	app := NewApp(s, c) // init
 	// draw the ui for the first time

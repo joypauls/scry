@@ -7,8 +7,8 @@ import (
 )
 
 type Config struct {
-	IgnoreHidden bool `yaml:"ignore-hidden"`
-	UseEmoji     bool `yaml:"use-emoji"`
+	ShowHidden bool `yaml:"show-hidden"`
+	UseEmoji   bool `yaml:"use-emoji"`
 }
 
 func NewConfig(path string) Config {

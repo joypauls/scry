@@ -9,6 +9,7 @@ import (
 type Config struct {
 	ShowHidden bool `yaml:"show-hidden"`
 	UseEmoji   bool `yaml:"use-emoji"`
+	StartPath  string
 }
 
 func NewConfig(path string) Config {

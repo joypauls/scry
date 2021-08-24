@@ -19,6 +19,9 @@ func (p *Path) Set(s string) {
 }
 
 func (p *Path) String() string {
+	if len(p.cur) > 1 {
+		return p.cur + string(fp.Separator)
+	}
 	return p.cur
 }
 

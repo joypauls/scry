@@ -10,7 +10,6 @@ package app
 import (
 	"fmt"
 	"log"
-	"os"
 	fp "path/filepath"
 
 	"github.com/gdamore/tcell/v2"
@@ -190,10 +189,9 @@ func Run(c Config) {
 
 	quit := func() {
 		s.Fini()
-		os.Exit(0)
 	}
 
-	// loop:
+renderloop:
 	for {
 		s.Show()            // Update screen
 		ev := s.PollEvent() // Poll event
@@ -204,6 +202,7 @@ func Run(c Config) {
 		case *tcell.EventKey:
 			if ev.Key() == tcell.KeyEscape || ev.Key() == tcell.KeyCtrlC {
 				quit()
+				break renderloop
 			} else if ev.Key() == tcell.KeyDown {
 				// handle scrolling down
 				if app.index == app.maxIndex {

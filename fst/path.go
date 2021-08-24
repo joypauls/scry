@@ -30,13 +30,16 @@ func (p *Path) Parent() string {
 	return fp.Dir(p.cur)
 }
 
-// right now only works for starting at current directory
-func NewPath() *Path {
+func NewPath(s string) *Path {
 	p := new(Path)
-	cur, err := os.Getwd()
-	if err != nil {
-		log.Println(err)
+	if len(s) > 0 {
+		p.cur = s
+	} else {
+		cur, err := os.Getwd()
+		if err != nil {
+			log.Fatalln(err)
+		}
+		p.cur = cur
 	}
-	p.Set(cur)
 	return p
 }

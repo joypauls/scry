@@ -12,32 +12,21 @@ import (
 
 const configFile = ".scry.yaml"
 
-// // logging for dev purposes
-// func log(level string, message string) {
-// 	dt := time.Now()
-// 	pattern := regexp.MustCompile("-[^-]*$")
-// 	fmt.Printf(
-// 		"%s [%s] %s\n",
-// 		pattern.ReplaceAllString(dt.Format(time.RFC3339), ""),
-// 		strings.ToUpper(level),
-// 		message,
-// 	)
-// }
-
-const helpText = `
-Usage:
-	scry [flags] <path>
+const titleText = "Scry CLI tool"
+const helpText = `Usage:
+        scry                  (Basic)
+        scry [flags] <path>   (Advanced)
 
 Path:
-	<path> is a single optional argument that scry will try to resolve to
-	a valid starting directory. Default is the current directory.
+        <path> is a single optional argument that scry will try to resolve 
+        to a valid starting directory. Default is the current directory.
 
 Flags:
 `
 
-func customUsage() {
-	fmt.Fprintf(os.Stderr, "Usage of %s:\n\n", os.Args[0])
-	fmt.Println(helpText)
+func customUsageText() {
+	fmt.Fprintf(os.Stderr, "%s\n\n", titleText)
+	fmt.Fprintln(os.Stderr, helpText)
 	flag.PrintDefaults()
 }
 
@@ -52,7 +41,7 @@ func main() {
 	config := app.NewConfig(configPath)
 
 	// custom usage output
-	flag.Usage = customUsage
+	flag.Usage = customUsageText
 
 	// parse args
 	useEmojiFlag := flag.Bool("e", false, "Use emoji in UI (sparingly)")
@@ -91,5 +80,7 @@ func main() {
 		log.Print("Exiting properly")
 		os.Exit(0)
 	}()
+
+	// start the render loop
 	app.Run(config)
 }

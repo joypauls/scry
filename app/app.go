@@ -158,11 +158,11 @@ func NewApp(s tcell.Screen, c Config) *App {
 	w, h := s.Size()
 	app := &App{
 		Layout:    MakeLayout(w, h),
-		Directory: fst.NewDirectory(fst.NewPath(), c.ShowHidden),
+		Directory: fst.NewDirectory(fst.NewPath(c.StartPath), c.ShowHidden),
 		Config:    c,
 	}
-	app.path = fst.NewPath() // init at wd
-	app.home = fst.NewPath() // could do a deep copy but it's cheap so meh
+	app.path = fst.NewPath(c.StartPath) // init at wd
+	app.home = fst.NewPath(c.StartPath) // could do a deep copy but it's cheap so meh
 	app.index = 0
 	app.maxIndex = minInt(app.windowHeight-1, app.Size()-1)
 	app.offset = 0

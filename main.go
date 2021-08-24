@@ -8,21 +8,19 @@ import (
 	fp "path/filepath"
 
 	"github.com/joypauls/scry/app"
+	"github.com/joypauls/scry/fst"
 )
-
-const configFile = ".scry.yaml"
 
 const titleText = "Scry CLI tool"
 const helpText = `Usage:
-        scry                  (Basic)
-        scry [flags] <path>   (Advanced)
+  scry                   (Basic)
+  scry [flags] <path>    (Optional)
 
 Path:
-        <path> is a single optional argument that scry will try to resolve 
-        to a valid starting directory. Default is the current directory.
+  <path> is a single optional argument that scry will try to resolve 
+  to a valid starting directory. Default is the current directory.
 
-Flags:
-`
+Flags:`
 
 func customUsageText() {
 	fmt.Fprintf(os.Stderr, "%s\n\n", titleText)
@@ -30,27 +28,10 @@ func customUsageText() {
 	flag.PrintDefaults()
 }
 
-func main() {
-	// parse the config file if present
-	configPath := ""
-	home, err := os.UserHomeDir()
-	if err == nil {
-		configPath = fp.Join(home, configFile)
-	}
-	// should check if this exists
-	config := app.NewConfig(configPath)
-
-	// custom usage output
-	flag.Usage = customUsageText
-
-	// parse args
-	useEmojiFlag := flag.Bool("e", false, "Use emoji in UI (sparingly)")
-	showHiddenFlag := flag.Bool("a", false, "Show dotfiles/directories")
-	flag.Parse()
-
-	// intended behavior is <=1, which is a path or resolve to path
-	args := flag.Args()
-	if len(args) == 1 {
+func parseArgs(args []string, c *app.Config) {
+	if len(args) == 0 {
+		c.Home = fst.NewPath("")
+	} else if len(args) == 1 {
 		parsed, err := fp.Abs(args[0])
 		if err != nil {
 			log.Fatalf("Couldn't parse the path: %s", args[0])
@@ -61,25 +42,42 @@ func main() {
 		} else if !fi.IsDir() {
 			parsed = fp.Dir(parsed)
 		}
-		config.StartPath = parsed
-		fmt.Printf("Arg: %s\n", config.StartPath)
-	} else if len(args) > 1 {
+		c.Home = fst.NewPath(parsed)
+		fmt.Printf("Arg: %s\n", c.Home)
+	} else {
 		log.Fatal("Too many arguments supplied - zero(0) or one(1) required")
 	}
+}
 
+func main() {
+	defer os.Exit(0)
+	// read config file or set defaults
+	config := app.MakeConfig()
+
+	// set custom usage output (-h or --help)
+	flag.Usage = customUsageText
+
+	// parse flags
+	useEmojiFlag := flag.Bool("e", false, "Use emoji in UI (sparingly)")
+	showHiddenFlag := flag.Bool("a", false, "Show dotfiles/directories")
+	devFlag := flag.Bool("dev", false, "Show debugging messages")
+	flag.Parse()
 	if *useEmojiFlag {
 		config.UseEmoji = *useEmojiFlag
-	} // else ignore because it wasnt supplied right?
+	} // else ignore
 	if *showHiddenFlag {
 		config.ShowHidden = *showHiddenFlag
-	} // else ignore because it wasnt supplied right?
+	} // else ignore
 
-	// dev log messages, should remove for release
-	log.Print("Starting scry")
-	defer func() {
-		log.Print("Exiting properly")
-		os.Exit(0)
-	}()
+	// parse remaining args
+	parseArgs(flag.Args(), &config)
+
+	if *devFlag {
+		// dev log messages
+		log.Print("START")
+		log.Printf("home -> %s", config.Home)
+		defer log.Print("EXIT")
+	}
 
 	// start the render loop
 	app.Run(config)

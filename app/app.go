@@ -53,8 +53,8 @@ func maxInt(a, b int) int {
 // draw stuff that is not file content
 func drawFrame(s tcell.Screen, app *App) {
 	// top line
-	// draw(0, 0, coldef, coldef, app.path.String())
-	header := app.path.String()
+	// draw(0, 0, coldef, coldef, app.path.Pretty())
+	header := app.path.Pretty()
 	if app.UseEmoji {
 		header = "🔮 " + header
 	}
@@ -80,7 +80,7 @@ func drawWindow(s tcell.Screen, app *App) {
 			app.xStart,
 			app.yStart+i,
 			i == app.index,
-			app.File(i+app.offset),
+			*app.File(i + app.offset),
 			*app.path,
 		)
 	}
@@ -158,11 +158,11 @@ func NewApp(s tcell.Screen, c Config) *App {
 	w, h := s.Size()
 	app := &App{
 		Layout:    MakeLayout(w, h),
-		Directory: fst.NewDirectory(fst.NewPath(c.StartPath), c.ShowHidden),
+		Directory: fst.NewDirectory(c.Home, c.ShowHidden),
 		Config:    c,
 	}
-	app.path = fst.NewPath(c.StartPath) // init at wd
-	app.home = fst.NewPath(c.StartPath) // could do a deep copy but it's cheap so meh
+	app.home = c.Home
+	app.path = c.Home.Copy()
 	app.index = 0
 	app.maxIndex = minInt(app.windowHeight-1, app.Size()-1)
 	app.offset = 0
@@ -233,6 +233,13 @@ renderloop:
 				app.GoToParent()
 			} else if ev.Key() == tcell.KeyRight {
 				app.GoToChild()
+			} else if ev.Key() == tcell.KeyRune {
+				if ev.Rune() == 'h' || ev.Rune() == 'H' {
+					app.path.Set(app.home.String())
+					app.Read(app.path, app.ShowHidden)
+					app.ResetIndex()
+					app.offset = 0
+				}
 			}
 		case *tcell.EventError:
 			// can we access the actual tcell error? idk

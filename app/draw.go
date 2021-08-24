@@ -47,7 +47,7 @@ func draw(s tcell.Screen, x, y int, style tcell.Style, text string) {
 	}
 }
 
-func drawFile(s tcell.Screen, x, y int, selected bool, f *fst.File, p fst.Path) {
+func drawFile(s tcell.Screen, x, y int, selected bool, f fst.File, p fst.Path) {
 	style := defStyle
 	if selected {
 		style = selStyle

@@ -11,6 +11,10 @@ import (
 	"github.com/joypauls/scry/fst"
 )
 
+// This is overwritten at compile time with build flags with current tag
+// See build step in Makefile
+var version = "v0.0.0"
+
 const titleText = "Scry CLI tool"
 const helpText = `Usage:
   scry                   (Basic)
@@ -60,8 +64,13 @@ func main() {
 	// parse flags
 	useEmojiFlag := flag.Bool("e", false, "Use emoji in UI (sparingly)")
 	showHiddenFlag := flag.Bool("a", false, "Show dotfiles/directories")
+	versionFlag := flag.Bool("v", false, "Show dotfiles/directories")
 	devFlag := flag.Bool("dev", false, "Show debugging messages")
 	flag.Parse()
+	if *versionFlag {
+		fmt.Println(version)
+		os.Exit(0)
+	}
 	if *useEmojiFlag {
 		config.UseEmoji = *useEmojiFlag
 	} // else ignore
@@ -73,7 +82,6 @@ func main() {
 	parseArgs(flag.Args(), &config)
 
 	if *devFlag {
-		// dev log messages
 		log.Print("START")
 		log.Printf("home -> %s", config.Home)
 		defer log.Print("EXIT")

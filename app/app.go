@@ -68,7 +68,7 @@ func drawFrame(s tcell.Screen, app *App) {
 	// bottom line
 	coordStr := fmt.Sprintf("(%d)", app.index)
 	draw(s, app.xEnd-len(coordStr)+1, app.height-1, defStyle, coordStr)
-	draw(s, 0, app.height-1, defStyle, "[ESC] quit, [h] help")
+	draw(s, 0, app.height-1, defStyle, "[esc] quit [h] home")
 }
 
 // Actual file contents

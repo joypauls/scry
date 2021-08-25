@@ -50,7 +50,7 @@ func (p1 *Path) Copy() *Path {
 func NewPath(s string) *Path {
 	p := new(Path)
 	if len(s) > 0 {
-		p.path = s
+		p.path = fp.Clean(s)
 	} else {
 		cur, err := os.Getwd()
 		if err != nil {

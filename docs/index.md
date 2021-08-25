@@ -1,31 +1,27 @@
 ## How To Use
 
-### Installation
+### Installation (via Binary)
 
+M1 Mac:
 ```
-# download
-# unzip
-# install
+wget https://github.com/joypauls/scry/releases/download/v0.0.1/scry-darwin-arm64.tar.gz
+tar -xvzf scry-darwin-arm64.tar.gz
+sudo mv scry-darwin-arm64 /usr/local/bin/scry
 ```
 
-1. Download compressed binary
-2. Decompress
-3. Install
-4. Confirm
+Confirm your installation with `scry -v`
 
 ### Basic Usage
 
 ### Compatibility
 
-Currently supported (i.e. confirmed by testing... probably will still work on many others!) operating systems:
-- macOS (tested on Big Sur)
-- Several Linux flavors
+The only currently supported OS - that is, confirmed by testing... probably will still work on many others!) is Darwin. However, you will likely be able to build from source on your machine without issue if you are setup for Go development, see [Build From Source](#build-from-source).
 
-Keep in mind this will also depend on which [terminal emulator](https://en.wikipedia.org/wiki/List_of_terminal_emulators) you are using. If you see problems running this on your OS/terminal, [let us know](#support-and-bugs).
+Keep in mind this will also depend on which [terminal emulator](https://en.wikipedia.org/wiki/List_of_terminal_emulators) you are using. If you see problems running this on your OS/terminal, [let me know](#support-and-bugs).
 
 ### Customization
 
-Using the `.scry.yaml` file
+Use the `.scry.yaml` file
 
 ## Developers
 

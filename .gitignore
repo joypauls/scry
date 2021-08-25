@@ -2,8 +2,12 @@
 scry
 _*
 bin/sy
-bin/scry
+bin/scry*
+*scry
+*scry.*
+scry*
 _link
+coverage.out
 
 # Binaries for programs and plugins
 *.exe

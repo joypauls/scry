@@ -64,8 +64,8 @@ func main() {
 	// parse flags
 	useEmojiFlag := flag.Bool("e", false, "Use emoji in UI (sparingly)")
 	showHiddenFlag := flag.Bool("a", false, "Show dotfiles/directories")
-	versionFlag := flag.Bool("v", false, "Show dotfiles/directories")
-	devFlag := flag.Bool("dev", false, "Show debugging messages")
+	versionFlag := flag.Bool("v", false, "Show build version")
+	devFlag := flag.Bool("d", false, "Show debugging messages")
 	flag.Parse()
 	if *versionFlag {
 		fmt.Println(version)

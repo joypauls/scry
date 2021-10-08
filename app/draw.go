@@ -11,33 +11,11 @@ import (
 	"github.com/mattn/go-runewidth"
 )
 
-// SI defined base for multiple byte units
-const baseSI = 1000
-const prefixSI = "kMGTPE"
-
 // symbols for display
 const dirLabel = "📁"
 const fileLabel = "  "
 
 // const otherLabel = "  "
-
-// Converts an integer number of bytes to SI units.
-func humanizeBytes(bytes int64) string {
-	if bytes < baseSI {
-		return fmt.Sprintf("%d B", bytes) // < 1kB
-	}
-	magnitude := int64(baseSI)
-	maxExp := 0
-	for i := bytes / baseSI; i >= baseSI; i /= baseSI {
-		magnitude *= baseSI
-		maxExp++
-	}
-	return fmt.Sprintf(
-		"%.1f %cB",
-		float64(bytes)/float64(magnitude), // want quotient to be float
-		prefixSI[maxExp],
-	)
-}
 
 // Uses tcell specific functionality to display a string in cells.
 func draw(s tcell.Screen, x, y int, style tcell.Style, text string) {
@@ -69,7 +47,7 @@ func drawFile(s tcell.Screen, x, y int, selected bool, f fst.File, p fst.Path) {
 		label,
 		fmt.Sprintf("%02d-%02d-%d", f.Time.Month(), f.Time.Day(), f.Time.Year()%100),
 		f.Perm,
-		humanizeBytes(f.Size),
+		f.Size.String(),
 		name,
 	)
 	draw(s, x, y, style, line)

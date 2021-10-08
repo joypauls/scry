@@ -8,7 +8,7 @@ type Layout struct {
 	xEnd         int
 	yStart       int
 	yEnd         int
-	windowHeight int // equals the # of available lines
+	windowHeight int // equals the # of available lines for dir contents
 }
 
 // constructor for Layout

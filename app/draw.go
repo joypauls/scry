@@ -15,8 +15,6 @@ import (
 const dirLabel = "📁"
 const fileLabel = "  "
 
-// const otherLabel = "  "
-
 // Uses tcell specific functionality to display a string in cells.
 func draw(s tcell.Screen, x, y int, style tcell.Style, text string) {
 	for _, r := range []rune(text) {
@@ -43,7 +41,7 @@ func drawFile(s tcell.Screen, x, y int, selected bool, f fst.File, p fst.Path) {
 		}
 		name = name + fmt.Sprintf(" %c %s", arrowRight, target)
 	}
-	line := fmt.Sprintf("%s  %-4s  %#-4o  %-9s  %s ",
+	line := fmt.Sprintf("%s %-4s  %#-4o  %-9s  %s ",
 		label,
 		fmt.Sprintf("%02d-%02d-%d", f.Time.Month(), f.Time.Day(), f.Time.Year()%100),
 		f.Perm,

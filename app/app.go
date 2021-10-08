@@ -50,15 +50,17 @@ func maxInt(a, b int) int {
 	return b
 }
 
-// draw stuff that is not file content
+// draw stuff that is not directory contents
 func drawFrame(s tcell.Screen, app *App) {
-	// top line
-	// draw(0, 0, coldef, coldef, app.path.Pretty())
-	header := app.path.Pretty()
+
+	// top bar content
+	maxHeaderLen := (7 * app.width) / 10 // 70% of width
+	header := formatPath(app.path, maxHeaderLen)
 	if app.UseEmoji {
 		header = "🔮 " + header
 	}
 	draw(s, 0, 0, defStyle, header)
+
 	if app.offset > 0 {
 		draw(s, 0, 1, defStyle, fmt.Sprintf("%c", arrowUp))
 	}

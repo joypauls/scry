@@ -8,7 +8,7 @@ import (
 
 /*
 Path's job is to stay nice and neat instead of hoping string
-is formatted properly.
+is formatted properly. Abstracting away from the base Go path stuff.
 **/
 type Path struct {
 	path string
@@ -25,14 +25,6 @@ func (p *Path) Set(s string) {
 
 // String() must always keep compatibility with path/filepath pkg
 func (p *Path) String() string {
-	return p.path
-}
-
-// Pretty() returns a nicely formatted string not necessarily compatible with path/filepath
-func (p *Path) Pretty() string {
-	if len(p.path) > 1 {
-		return p.path + string(fp.Separator)
-	}
 	return p.path
 }
 

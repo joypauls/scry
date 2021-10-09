@@ -1,4 +1,5 @@
 [![Go Report](https://goreportcard.com/badge/github.com/joypauls/scry)](https://goreportcard.com/badge/github.com/joypauls/scry)
+![Code Coverage](https://storage.cloud.google.com/scry-build/code-coverage.svg)
 
 > :warning: **WIP**: This is just a prototype, use at own risk!
 

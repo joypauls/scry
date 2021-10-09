@@ -7,6 +7,8 @@ import (
 	"log"
 	"os"
 	"regexp"
+	"sort"
+	"strings"
 )
 
 func readFiles(p *Path, showHidden bool) []File {
@@ -50,6 +52,13 @@ func (d *Directory) Files() []File {
 	return d.files
 }
 
+func (d *Directory) SortNameDesc() {
+	sort.Slice(d.files, func(i, j int) bool {
+		// this feels inefficient
+		return strings.ToLower(d.files[i].Name) < strings.ToLower(d.files[j].Name)
+	})
+}
+
 func (d *Directory) Size() int {
 	return d.size
 }
@@ -60,6 +69,7 @@ func (d *Directory) IsEmpty() bool {
 
 func (d *Directory) Read(p *Path, showHidden bool) {
 	d.files = readFiles(p, showHidden)
+	d.SortNameDesc() // just sort for default for now
 	d.size = len(d.files)
 }
 

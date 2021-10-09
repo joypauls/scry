@@ -14,15 +14,7 @@ import (
 type BytesSI float64
 
 const (
-	_          = iota // ignore first value by assigning to blank identifier
-	KB BytesSI = 1 << (10 * iota)
-	MB
-	GB
-	TB
-	PB
-	EB
-	ZB
-	YB
+	KB, MB, GB, TB, PB, EB, ZB, YB = 1e3, 1e6, 1e9, 1e12, 1e15, 1e18, 1e21, 1e24
 )
 
 func (b BytesSI) String() string {

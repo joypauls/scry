@@ -14,6 +14,7 @@ clean:
 	go mod tidy
 
 serve-docs:
+	cd docs
 	bundle exec jekyll serve
 
 test:

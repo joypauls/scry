@@ -2,6 +2,7 @@
 package app
 
 import (
+	"fmt"
 	fp "path/filepath"
 	"regexp"
 
@@ -10,15 +11,17 @@ import (
 
 // minimum for maxLength is 5 (/... leading, / trailing), enforce?
 func formatPath(p *fst.Path, maxLen int) string {
-	if len(p.String())+1 < maxLen {
+	if len(p.String()) == 1 {
+		return p.String()
+	} else if len(p.String()) < maxLen {
 		return p.String() + string(fp.Separator)
 	}
 	// iterate until the path is shortened enough
 	re := regexp.MustCompile(`^\/[^\/]*`)
-	formatted := p.String()
-	for len(formatted)+5 > maxLen {
-		formatted = re.ReplaceAllString(formatted, "")
+	clipped := p.String()
+	for len(clipped)+5 > maxLen {
+		clipped = re.ReplaceAllString(clipped, "")
 		// eventually could terminate to just "/'" if last node is > maxLength?
 	}
-	return "/..." + formatted + string(fp.Separator)
+	return fmt.Sprintf("/...%s%c", clipped, fp.Separator)
 }

@@ -47,17 +47,6 @@ func TestPathString(t *testing.T) {
 	}
 }
 
-func TestPathPretty(t *testing.T) {
-	// setup
-	s := "/usr/src/app"
-	// test
-	got := NewPath(s).Pretty()
-	want := "/usr/src/app/"
-	if got != want {
-		t.Errorf("got %q, wanted %q", got, want)
-	}
-}
-
 func TestPathCopy(t *testing.T) {
 	// setup
 	s := "/usr/src/app"

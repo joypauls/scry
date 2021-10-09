@@ -4,5 +4,17 @@
 
 # scry :crystal_ball:
 
-A CLI tool written in Go to **quickly** explore a POSIX file system with **minimal keystrokes** so it can keep up with your thoughts. Intended to exist in the space somewhere between `ls` and a full-featured GUI file manager.
+A CLI tool written in Go to **quickly** explore a POSIX file system with ease so it can keep up with your thoughts. Intended to exist in the space somewhere between the `ls` utility and a full-featured GUI file manager.
+
+## Get Started
+
+### Install
+
+### Usage
+
+## Supported Architectures
+
+## Docs
+
+The rest of the documentation can be found at [](joypauls.github.io/scry/).
 

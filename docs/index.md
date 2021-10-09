@@ -38,6 +38,8 @@ This app is a just a regular old Go program so if you're set up to develop Go on
 
 ## Support and Bugs
 
-A bug? In my code?!? Unlikely!
+A bug? In my code?!?
+
+<iframe src="https://giphy.com/embed/3o7aTIGlhSo1bL8QUg" width="480" height="270" frameBorder="0" class="giphy-embed" allowFullScreen></iframe><p><a href="https://giphy.com/gifs/filmeditor-clueless-movie-3o7aTIGlhSo1bL8QUg">via GIPHY</a></p>
 
 Just kidding 😊 Thank you for trying **scry** out! Please head over to the project page on Github and [open an issue](https://github.com/joypauls/scry/issues/new) and let me know how I can help or what problems you're seeing!

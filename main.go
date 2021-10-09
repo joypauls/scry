@@ -11,8 +11,8 @@ import (
 	"github.com/joypauls/scry/fst"
 )
 
-// This is overwritten at compile time with build flags with current tag
-// See build step in Makefile
+// This is overwritten at compile time with build flags with the current tag
+// See build step in Makefile to get a sense of what happens
 var version = "v0.0.0"
 
 const titleText = "Scry CLI tool"
@@ -34,7 +34,7 @@ func customUsageText() {
 
 func parseArgs(args []string, c *app.Config) {
 	if len(args) == 0 {
-		c.Home = fst.NewPath("")
+		c.InitDir = fst.NewPath("")
 	} else if len(args) == 1 {
 		parsed, err := fp.Abs(args[0])
 		if err != nil {
@@ -46,8 +46,8 @@ func parseArgs(args []string, c *app.Config) {
 		} else if !fi.IsDir() {
 			parsed = fp.Dir(parsed)
 		}
-		c.Home = fst.NewPath(parsed)
-		fmt.Printf("Arg: %s\n", c.Home)
+		c.InitDir = fst.NewPath(parsed)
+		fmt.Printf("Arg: %s\n", c.InitDir)
 	} else {
 		log.Fatal("Too many arguments supplied - zero(0) or one(1) required")
 	}
@@ -83,7 +83,7 @@ func main() {
 
 	if *devFlag {
 		log.Print("START")
-		log.Printf("home -> %s", config.Home)
+		log.Printf("home -> %s", config.InitDir)
 		defer log.Print("EXIT")
 	}
 

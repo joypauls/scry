@@ -10,12 +10,13 @@ import (
 	"github.com/joypauls/scry/fst"
 )
 
-const configFile = ".scry.yaml"
+const configFile = ".config/scry/config.yaml"
 
 type Config struct {
-	ShowHidden bool `yaml:"show-hidden"`
-	UseEmoji   bool `yaml:"use-emoji"`
-	Home       *fst.Path
+	ShowHidden bool      `yaml:"show-hidden"`
+	UseEmoji   bool      `yaml:"use-emoji"`
+	InitDir    *fst.Path // where scry is initialized
+	Home       *fst.Path // actual user home directory
 }
 
 func MakeConfig() Config {
@@ -25,8 +26,11 @@ func MakeConfig() Config {
 	home, err := os.UserHomeDir()
 	if err == nil {
 		path = fp.Join(home, configFile)
+		config.Home = fst.NewPath(home)
+	} else {
+		config.Home = fst.NewPath("")
 	}
-	// should this be checked if it exists?
+	// should this be checked if it exists? should just error?
 	f, err := ioutil.ReadFile(path)
 	if err != nil {
 		// can't find it? ignore?

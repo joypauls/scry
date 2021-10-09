@@ -14,7 +14,7 @@ func TestParseArgs(t *testing.T) {
 	config := app.MakeConfig()
 	parseArgs(args, &config)
 	// test
-	got := config.Home
+	got := config.InitDir
 	want := fst.NewPath("")
 	if *got != *want {
 		t.Errorf("got %q, wanted %q", *got, *want)
@@ -26,7 +26,7 @@ func TestParseArgs(t *testing.T) {
 	config = app.MakeConfig()
 	parseArgs(args, &config)
 	// test
-	got = config.Home
+	got = config.InitDir
 	want = fst.NewPath(wd)
 	if *got != *want {
 		t.Errorf("got %q, wanted %q", *got, *want)

@@ -70,7 +70,7 @@ func drawFrame(s tcell.Screen, app *App) {
 	// bottom line
 	coordStr := fmt.Sprintf("(%d)", app.index)
 	draw(s, app.xEnd-len(coordStr)+1, app.height-1, defStyle, coordStr)
-	draw(s, 0, app.height-1, defStyle, "[esc] quit [h] home")
+	draw(s, 0, app.height-1, defStyle, "[esc] quit [h] home [b] initial")
 }
 
 // Actual file contents
@@ -94,7 +94,6 @@ type App struct {
 	*fst.Directory
 	Config
 	path     *fst.Path
-	home     *fst.Path
 	index    int // 0 <= index < maxIndex
 	maxIndex int
 	offset   int // start of window
@@ -160,11 +159,10 @@ func NewApp(s tcell.Screen, c Config) *App {
 	w, h := s.Size()
 	app := &App{
 		Layout:    MakeLayout(w, h),
-		Directory: fst.NewDirectory(c.Home, c.ShowHidden),
+		Directory: fst.NewDirectory(c.InitDir, c.ShowHidden),
 		Config:    c,
 	}
-	app.home = c.Home
-	app.path = c.Home.Copy()
+	app.path = c.InitDir.Copy()
 	app.index = 0
 	app.maxIndex = minInt(app.windowHeight-1, app.Size()-1)
 	app.offset = 0
@@ -237,7 +235,14 @@ renderloop:
 				app.GoToChild()
 			} else if ev.Key() == tcell.KeyRune {
 				if ev.Rune() == 'h' || ev.Rune() == 'H' {
-					app.path.Set(app.home.String())
+					// go to user home directory (if it was found)
+					app.path.Set(app.Home.String())
+					app.Read(app.path, app.ShowHidden)
+					app.ResetIndex()
+					app.offset = 0
+				} else if ev.Rune() == 'b' || ev.Rune() == 'B' {
+					// go to initial directory
+					app.path.Set(app.InitDir.String())
 					app.Read(app.path, app.ShowHidden)
 					app.ResetIndex()
 					app.offset = 0

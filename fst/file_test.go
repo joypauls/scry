@@ -41,3 +41,17 @@ func TestBytesSIStringFormat(t *testing.T) {
 		}
 	}
 }
+
+// func TestFileStructCreation(t *testing.T) {
+// 	result := KB
+// 	expected := 1000.0
+// 	if result != expected {
+// 		t.Errorf("Result: %f, Wanted: %f", result, expected)
+// 	}
+
+// 	result = GB
+// 	expected = 1000000000.0
+// 	if result != expected {
+// 		t.Errorf("Result: %f, Expected: %f", result, expected)
+// 	}
+// }

@@ -2,6 +2,7 @@ package app
 
 import (
 	"testing"
+	"time"
 
 	"github.com/joypauls/scry/fst"
 )
@@ -44,5 +45,23 @@ func TestFormatPathWeird(t *testing.T) {
 		if result != table.expected {
 			t.Errorf("Result: %s, Expected: %s", result, table.expected)
 		}
+	}
+}
+
+func TestFormatFileRegular(t *testing.T) {
+	testFile := fst.File{
+		Name:      "test.go",
+		Size:      fst.BytesSI(12345),
+		Time:      time.Date(2021, time.October, 1, 12, 0, 0, 0, time.UTC),
+		IsDir:     false,
+		IsReg:     true,
+		IsSymLink: false,
+		Perm:      0777,
+	}
+	testPath := fst.NewPath("/")
+	result := formatFile(testFile, *testPath)
+	expected := "   10-01-21  0777  12.3 KB    test.go "
+	if result != expected {
+		t.Errorf("Result: %s, Wanted: %s", result, expected)
 	}
 }

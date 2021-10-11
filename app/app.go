@@ -19,7 +19,8 @@ import (
 
 // Set default text style
 
-// this global config sucks let's get rid of it
+// this global config sucks let's get rid of it please
+// should just handle all this in config setup?
 var defStyle = tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorReset)
 var selStyle = tcell.StyleDefault.Foreground(tcell.ColorWhite).Background(tcell.ColorBlueViolet)
 var arrowLeft = '←'

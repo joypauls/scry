@@ -41,13 +41,13 @@ func (b BytesSI) String() string {
 
 // Should use custom enum to restrict supported file types
 type File struct {
-	Name  string
-	Size  BytesSI
-	IsDir bool
-	IsReg bool
-	Mode  os.FileMode
-	Time  time.Time
-	Perm  fs.FileMode
+	Name      string
+	Size      BytesSI
+	IsDir     bool
+	IsReg     bool
+	IsSymLink bool
+	Time      time.Time
+	Perm      fs.FileMode
 }
 
 func MakeFile(d os.DirEntry) File {
@@ -63,10 +63,6 @@ func MakeFile(d os.DirEntry) File {
 	f.Time = fi.ModTime()
 	f.Perm = fi.Mode().Perm()
 	f.IsReg = fi.Mode().IsRegular()
-	f.Mode = fi.Mode()
+	f.IsSymLink = fi.Mode()&os.ModeSymlink != 0
 	return f
-}
-
-func (f File) IsSymLink() bool {
-	return f.Mode&os.ModeSymlink != 0
 }

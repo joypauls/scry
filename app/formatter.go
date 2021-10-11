@@ -3,11 +3,16 @@ package app
 
 import (
 	"fmt"
+	"os"
 	fp "path/filepath"
 	"regexp"
 
 	"github.com/joypauls/scry/fst"
 )
+
+// symbols for file
+const dirLabel = "📁"
+const fileLabel = "  "
 
 // minimum for maxLength is 5 (/... leading, / trailing), enforce?
 func formatPath(p *fst.Path, maxLen int) string {
@@ -24,4 +29,27 @@ func formatPath(p *fst.Path, maxLen int) string {
 		// eventually could terminate to just "/'" if last node is > maxLength?
 	}
 	return fmt.Sprintf("/...%s%c", clipped, fp.Separator)
+}
+
+func formatFile(f fst.File, p fst.Path) string {
+	label := fileLabel
+	if f.IsDir {
+		label = dirLabel
+	}
+	name := f.Name
+	// check for symlink
+	if f.IsSymLink {
+		target, err := os.Readlink(fp.Join(p.String(), name))
+		if err != nil {
+			target = "?"
+		}
+		name = name + fmt.Sprintf(" %c %s", arrowRight, target)
+	}
+	return fmt.Sprintf("%s %-4s  %#-4o  %-9s  %s ",
+		label,
+		fmt.Sprintf("%02d-%02d-%d", f.Time.Month(), f.Time.Day(), f.Time.Year()%100),
+		f.Perm,
+		f.Size.String(),
+		name,
+	)
 }

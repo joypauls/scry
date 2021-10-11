@@ -1,13 +1,20 @@
 [![Go Report](https://goreportcard.com/badge/github.com/joypauls/scry)](https://goreportcard.com/badge/github.com/joypauls/scry)
 ![Code Coverage](https://storage.googleapis.com/scry-build/code-coverage.svg)
+![Latest Release](https://img.shields.io/github/v/release/joypauls/scry?include_prereleases)
 
 > :warning: **WIP**: This is just a prototype, use at own risk!
 
 # scry :crystal_ball:
 
-A CLI tool written in Go to **quickly** explore a POSIX file system with ease so it can keep up with your thoughts. Intended to exist in the space somewhere between the `ls` utility and a full-featured GUI file manager.
+A CLI tool file system explorer written in Go intuitive and snappy enough to keep up with your thoughts! 
 
-## Get Started
+Intended to exist in the space somewhere between the `ls` utility and a full-featured GUI file manager like Ranger.
+
+Features:
+
+## Quick Start
+
+Check out the documentation [website](joypauls.github.io/scry/) for the best experience.
 
 ### Install
 

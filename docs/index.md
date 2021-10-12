@@ -1,8 +1,16 @@
-## How To Use
+# Documentation
 
-### Installation (via Binary)
+Welcome, happy to see you! While this project solidifies, feel free to head over to the project page and open an issue with any questions or requests. Happy hacking!
 
-M1 Mac:
+<iframe src="https://giphy.com/embed/l0Iy29zHAcTFJ7jXO" width="480" height="80" frameBorder="0" class="giphy-embed" allowFullScreen></iframe><p><a href="https://giphy.com/gifs/internet-2d-looping-l0Iy29zHAcTFJ7jXO">via GIPHY</a></p>
+
+## Get Started
+
+### Installation via Binary
+
+Right now, the binaries are not being built automatically. Our advice would be to go straight to the source for now if you're looking to experiment with the project.
+
+**M1 Mac**
 ```
 wget https://github.com/joypauls/scry/releases/download/v0.0.1/scry-darwin-arm64.tar.gz
 tar -xvzf scry-darwin-arm64.tar.gz
@@ -10,22 +18,6 @@ sudo mv scry-darwin-arm64 /usr/local/bin/scry
 ```
 
 Confirm your installation with `scry -v`
-
-### Basic Usage
-
-### Compatibility
-
-The only currently supported OS - that is, confirmed by testing... probably will still work on many others!) is Darwin. However, you will likely be able to build from source on your machine without issue if you are setup for Go development, see [Build From Source](#build-from-source).
-
-Keep in mind this will also depend on which [terminal emulator](https://en.wikipedia.org/wiki/List_of_terminal_emulators) you are using. If you see problems running this on your OS/terminal, [let me know](#support-and-bugs).
-
-### Customization
-
-Use the `.scry.yaml` file
-
-## Developers
-
-This app is a just a regular old Go program so if you're set up to develop Go on your system you can easily compile it yourself.
 
 ### Build from Source
 
@@ -36,10 +28,44 @@ This app is a just a regular old Go program so if you're set up to develop Go on
 
 3. Check that it worked with `<repo>/bin/scry -v`
 
+## Usage
+
+### Command Line Interface
+
+Simply use `scry` to get started, or pass a path argument (`scry /some/place/cool`) like the classic `ls` program if you're feeling spicy.
+
+Take a look at `scry --help` for more options.
+
+### Basic
+
+| Key | Description | Alternative |
+| --- | --- | --- |
+| Up Arrow | Scroll through directory | W |
+| Down Arrow | Scroll through directory | S |
+| Left Arrow | Scroll through directory | A |
+| Right Arrow | Scroll through directory | D |
+| Q | Exit | ESC |
+
+---
+
+## Compatibility
+
+The only currently supported OS (that is, confirmed by user testing... probably will still work on many others!) is Darwin. However, you will likely be able to build from source on your machine without issue if you are setup for Go development, see [Build From Source](#build-from-source).
+
+Keep in mind this could also depend on which [terminal emulator](https://en.wikipedia.org/wiki/List_of_terminal_emulators) you are using. If you see problems running this on your OS/terminal, [let me know](#support-and-bugs).
+
+## Customization
+
+Use the `.config/scry/config.yaml` file. Look at [the parser](https://github.com/joypauls/scry/blob/main/app/config.go) for the currently implemented features (we are actively adding to these).
+
+## Developers
+
+Check out the project on [GitHub](https://github.com/joypauls/scry)!
+
 ## Support and Bugs
 
 A bug? In my code?!?
 
 <iframe src="https://giphy.com/embed/3o7aTIGlhSo1bL8QUg" width="480" height="270" frameBorder="0" class="giphy-embed" allowFullScreen></iframe><p><a href="https://giphy.com/gifs/filmeditor-clueless-movie-3o7aTIGlhSo1bL8QUg">via GIPHY</a></p>
 
-Just kidding 😊 Thank you for trying **scry** out! Please head over to the project page on Github and [open an issue](https://github.com/joypauls/scry/issues/new) and let me know how I can help or what problems you're seeing!
+Just kidding 😊 Thank you for trying **scry** out! Feedback from actual real world testing is huge and we really appreciate it. Please head over to the project page on Github and [open an issue](https://github.com/joypauls/scry/issues/new) and let me know how I can help or what problems you're seeing!

@@ -6,23 +6,11 @@
 
 # scry :crystal_ball:
 
-A CLI tool file system explorer written in Go intuitive and snappy enough to keep up with your thoughts! 
+A terminal-based file system explorer written in Go intuitive and snappy enough to keep up with your thoughts! Intended to exist in the space somewhere between the `ls` utility and a full-featured GUI file manager like Ranger to make some common tasks easy, quick, and fun.
 
-Intended to exist in the space somewhere between the `ls` utility and a full-featured GUI file manager like Ranger.
-
-Features:
 
 ## Quick Start
 
-Check out the documentation [website](joypauls.github.io/scry/) for the best experience.
+Check out the documentation [website](joypauls.github.io/scry/) for the best experience, thank you!
 
-### Install
-
-### Usage
-
-## Supported Architectures
-
-## Docs
-
-The rest of the documentation can be found at [](joypauls.github.io/scry/).
 

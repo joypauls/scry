@@ -37,20 +37,6 @@ func initVars() {
 	}
 }
 
-func minInt(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-func maxInt(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
-
 // draw stuff that is not directory contents
 func drawFrame(s tcell.Screen, app *App) {
 
@@ -68,9 +54,9 @@ func drawFrame(s tcell.Screen, app *App) {
 	if app.maxIndex+app.offset+1 < app.Size() {
 		draw(s, 0, app.height-2, defStyle, fmt.Sprintf("%c", arrowDown))
 	}
-	// bottom line
-	coordStr := fmt.Sprintf("(%d)", app.index)
-	draw(s, app.xEnd-len(coordStr)+1, app.height-1, defStyle, coordStr)
+	// // bottom line
+	// coordStr := fmt.Sprintf("(%d)", app.index)
+	// draw(s, app.xEnd-len(coordStr)+1, app.height-1, defStyle, coordStr)
 	draw(s, 0, app.height-1, defStyle, "[esc] quit [h] home [b] initial")
 }
 

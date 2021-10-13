@@ -11,21 +11,26 @@ import (
 	"strings"
 )
 
-func readFiles(p *Path, showHidden bool) []File {
-	rawFiles, err := os.ReadDir(p.String()) // DirEntry slice
+func readDirectory(p *Path) []os.DirEntry {
+	contents, err := os.ReadDir(p.String()) // DirEntry slice
 	if err != nil {
+		// should handle this with more care
 		log.Fatal(err)
 	}
+	return contents
+}
+
+func processDirectory(contents []os.DirEntry, showHidden bool) []File {
 	// is this the right way to build this slice?
 	if showHidden {
-		files := make([]File, len(rawFiles))
-		for i, f := range rawFiles {
+		files := make([]File, len(contents))
+		for i, f := range contents {
 			files[i] = MakeFile(f)
 		}
 		return files
 	}
 	files := make([]File, 0)
-	for _, f := range rawFiles {
+	for _, f := range contents {
 		match, _ := regexp.MatchString("^\\.", f.Name())
 		if !match {
 			files = append(files, MakeFile(f))
@@ -68,7 +73,7 @@ func (d *Directory) IsEmpty() bool {
 }
 
 func (d *Directory) Read(p *Path, showHidden bool) {
-	d.files = readFiles(p, showHidden)
+	d.files = processDirectory(readDirectory(p), showHidden)
 	d.SortNameDesc() // just sort for default for now
 	d.size = len(d.files)
 }

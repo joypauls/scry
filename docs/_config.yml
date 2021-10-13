@@ -3,6 +3,6 @@ remote_theme: pages-themes/minimal@v0.2.0
 plugins:
 - jekyll-remote-theme # add this line to the plugins list if you already have one
 title: Scry CLI
-description: The CLI file system explorer that keeps up with your thoughts
+description: The terminal-based file system explorer and CLI tool that keeps up with your thoughts
 logo: ./assets/img/logo.png
 show_downloads: true

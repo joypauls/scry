@@ -35,12 +35,14 @@ jobs:
       run: |
         set -x
         total=`go tool cover -func=coverage.out | grep total | grep -Eo '[0-9]+\.[0-9]+'`
-        if (( $(echo "$total <= 20" | bc -l) )) ; then
+        if (( $(echo "$total < 20" | bc -l) )) ; then
           COLOR=red
-        elif (( $(echo "$total > 70" | bc -l) )); then
-          COLOR=green
-        else
+        elif (( $(echo "$total < 40" | bc -l) )); then
           COLOR=orange
+        elif (( $(echo "$total < 70" | bc -l) )); then
+          COLOR=yellow
+        else
+          COLOR=green
         fi
         curl "https://img.shields.io/badge/coverage-$total%25-$COLOR" > badge.svg
         gsutil  -h "Cache-Control: no-cache" cp badge.svg gs://scry-build/code-coverage.svg

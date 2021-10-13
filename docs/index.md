@@ -2,15 +2,23 @@
 
 Welcome, happy to see you! While this project solidifies, feel free to head over to the project page and open an issue with any questions or requests. Happy hacking!
 
+- [Get Started](#get-started)
+- [Usage](#usage)
+- [Additional Stuff](#additional-stuff)
+
+
 <iframe src="https://giphy.com/embed/l0Iy29zHAcTFJ7jXO" width="480" height="80" frameBorder="0" class="giphy-embed" allowFullScreen></iframe><p><a href="https://giphy.com/gifs/internet-2d-looping-l0Iy29zHAcTFJ7jXO">via GIPHY</a></p>
 
-## Get Started
+<br/>
+<br/>
 
-### Installation via Binary
+# Get Started
 
-Right now, the binaries are not being built automatically. Our advice would be to go straight to the source for now if you're looking to experiment with the project.
+## Installation via Binary
 
-**M1 Mac**
+Right now, the binaries are not being built automatically. Our advice would be to go straight to the source for now if you're looking to experiment with the project. If you still want to use the pre-built releases, see which are available on the [releases page](https://github.com/joypauls/scry/releases).
+
+M1 Mac:
 ```
 wget https://github.com/joypauls/scry/releases/download/v0.0.1/scry-darwin-arm64.tar.gz
 tar -xvzf scry-darwin-arm64.tar.gz
@@ -19,7 +27,7 @@ sudo mv scry-darwin-arm64 /usr/local/bin/scry
 
 Confirm your installation with `scry -v`
 
-### Build from Source
+## Build from Source
 
 1. Clone the repository `git clone https://github.com/joypauls/scry.git`
 
@@ -28,15 +36,15 @@ Confirm your installation with `scry -v`
 
 3. Check that it worked with `<repo>/bin/scry -v`
 
-## Usage
+# Usage
 
-### Command Line Interface
+## Command Line Interface
 
 Simply use `scry` to get started, or pass a path argument (`scry /some/place/cool`) like the classic `ls` program if you're feeling spicy.
 
 Take a look at `scry --help` for more options.
 
-### Basic
+## Basic
 
 | Key | Description | Alternative |
 | --- | --- | --- |
@@ -46,7 +54,13 @@ Take a look at `scry --help` for more options.
 | Right Arrow | Scroll through directory | D |
 | Q | Exit | ESC |
 
----
+<br/>
+<br/>
+---------
+<br/>
+<br/>
+
+# Additional Stuff
 
 ## Compatibility
 

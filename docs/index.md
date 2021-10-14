@@ -36,6 +36,11 @@ Confirm your installation with `scry -v`
 
 3. Check that it worked with `<repo>/bin/scry -v`
 
+<br/>
+<br/>
+<br/>
+<br/>
+
 # Usage
 
 ## Command Line Interface
@@ -56,7 +61,6 @@ Take a look at `scry --help` for more options.
 
 <br/>
 <br/>
----------
 <br/>
 <br/>
 

@@ -40,6 +40,8 @@ func (b BytesSI) String() string {
 }
 
 // Should use custom enum to restrict supported file types
+// Implements os.DirEntry
+// SHould think about the cost/benefit of reimplimenting DirEntry methods vs just composing?
 type File struct {
 	Name      string
 	Size      BytesSI
@@ -49,6 +51,11 @@ type File struct {
 	Time      time.Time
 	Perm      fs.FileMode
 }
+
+// // Needed to implement os.DirEntry
+// func (f File) Name() string {
+// 	return f.Name
+// }
 
 func MakeFile(d os.DirEntry) File {
 	var f File

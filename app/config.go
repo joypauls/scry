@@ -5,12 +5,9 @@ import (
 	"os"
 	fp "path/filepath"
 
-	"gopkg.in/yaml.v2"
-
 	"github.com/joypauls/scry/fst"
+	"gopkg.in/yaml.v2"
 )
-
-const configFile = ".config/scry/config.yaml"
 
 type Config struct {
 	ShowHidden bool      `yaml:"show-hidden"`
@@ -19,26 +16,29 @@ type Config struct {
 	Home       *fst.Path // actual user home directory
 }
 
-func MakeConfig() Config {
-	config := Config{}
-	// parse the config file if present
-	path := ""
-	home, err := os.UserHomeDir()
-	if err == nil {
-		path = fp.Join(home, configFile)
-		config.Home = fst.NewPath(home)
-	} else {
-		config.Home = fst.NewPath("")
-	}
+func (c Config) Parse(file string) Config {
+	// refactor to take a reader?
 	// should this be checked if it exists? should just error?
-	f, err := ioutil.ReadFile(path)
+	f, err := ioutil.ReadFile(fp.Join(c.Home.String(), file))
 	if err != nil {
 		// can't find it? ignore?
 	} else {
-		err = yaml.Unmarshal(f, &config)
+		err = yaml.Unmarshal(f, &c)
 		if err != nil {
 			// problem with the file, ignore?
 		}
+	}
+	return c
+}
+
+// Initialize with sensible defaults.
+func MakeConfig() Config {
+	config := Config{}
+	home, err := os.UserHomeDir()
+	if err == nil {
+		config.Home = fst.NewPath(home)
+	} else {
+		config.Home = fst.NewPath("")
 	}
 	return config
 }

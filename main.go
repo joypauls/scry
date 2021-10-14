@@ -15,6 +15,9 @@ import (
 // See build step in Makefile to get a sense of what happens
 var version = "v0.0.0"
 
+// Location to check for config override file
+const configFile = ".config/scry/config.yaml"
+
 const titleText = "Scry CLI tool"
 const helpText = `Usage:
   scry                   (Basic)
@@ -57,6 +60,7 @@ func main() {
 	defer os.Exit(0)
 	// read config file or set defaults
 	config := app.MakeConfig()
+	config = config.Parse(configFile)
 
 	// set custom usage output (-h or --help)
 	flag.Usage = customUsageText

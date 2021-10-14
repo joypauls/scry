@@ -1,7 +1,6 @@
 package fst
 
 import (
-	"fmt"
 	"log"
 	"testing"
 	"testing/fstest"
@@ -59,7 +58,6 @@ func TestProcessDirectory(t *testing.T) {
 
 	result := len(dirProcessed)
 	expected := 2
-	fmt.Println(dirProcessed)
 	if result != expected {
 		t.Errorf("Result: %d, Wanted: %d", result, expected)
 	}

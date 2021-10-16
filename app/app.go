@@ -130,7 +130,9 @@ func (app *App) GoToChild() {
 // this should handle all drawing on the screen
 func (app *App) Draw(s tcell.Screen) {
 	drawFrame(s, app)
-	if app.IsEmpty() {
+	if app.Problem() {
+		draw(s, app.xStart, app.yStart, defStyle, app.Error())
+	} else if app.IsEmpty() {
 		draw(s, app.xStart, app.yStart, defStyle, "<EMPTY>")
 	} else {
 		drawWindow(s, app)

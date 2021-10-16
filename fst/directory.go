@@ -11,13 +11,13 @@ import (
 	"strings"
 )
 
-func readDirectory(p *Path) []os.DirEntry {
+func readDirectory(p *Path) ([]os.DirEntry, error) {
 	contents, err := os.ReadDir(p.String()) // DirEntry slice
 	if err != nil {
 		// should handle this with more care
-		log.Fatal(err)
+		return []os.DirEntry{}, fmt.Errorf("Couldn't read the directory: %s", p.String())
 	}
-	return contents
+	return contents, nil
 }
 
 func processDirectory(contents []os.DirEntry, showHidden bool) []File {
@@ -43,6 +43,7 @@ func processDirectory(contents []os.DirEntry, showHidden bool) []File {
 type Directory struct {
 	files []File
 	size  int
+	err   error // where to store error if there's a problem processing the directory
 }
 
 func (d *Directory) File(i int) *File {
@@ -72,9 +73,23 @@ func (d *Directory) IsEmpty() bool {
 	return d.size == 0
 }
 
+func (d *Directory) Problem() bool {
+	return d.err != nil
+}
+
+func (d *Directory) Error() string {
+	return d.err.Error()
+}
+
 func (d *Directory) Read(p *Path, showHidden bool) {
-	d.files = processDirectory(readDirectory(p), showHidden)
-	d.SortNameDesc() // just sort for default for now
+	dir, err := readDirectory(p)
+	if err != nil {
+		d.files = []File{}
+	} else {
+		d.files = processDirectory(dir, showHidden)
+		d.SortNameDesc() // just sort for default for now
+	}
+	d.err = err
 	d.size = len(d.files)
 }
 

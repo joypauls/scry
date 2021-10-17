@@ -1,6 +1,7 @@
 package app
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -59,8 +60,8 @@ func TestFormatFileRegular(t *testing.T) {
 		Perm:      0777,
 	}
 	testPath := fst.NewPath("/")
-	result := formatFile(testFile, *testPath)
-	expected := "   10-01-21  0777  12.3 KB    test.go "
+	result := formatFile(testFile, testPath)
+	expected := fmt.Sprintf("%s 10-01-21  0777  12.3 KB    test.go ", fileLabel)
 	if result != expected {
 		t.Errorf("Result: %s, Wanted: %s", result, expected)
 	}

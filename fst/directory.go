@@ -16,12 +16,12 @@ func readDirectory(p *Path) ([]os.DirEntry, error) {
 	contents, err := os.ReadDir(p.String()) // DirEntry slice
 	if err != nil {
 		if os.IsPermission(err) {
-			return []os.DirEntry{}, errors.New("Error reading the current directory: Permission denied.")
+			return []os.DirEntry{}, errors.New("Error reading directory: Permission denied 🔒")
 		}
 		// should handle this with more care
 		// we don't need to display the path because it is on the top status bar
 		// return []os.DirEntry{}, fmt.Errorf("Couldn't read the directory: %s", p.String())
-		return []os.DirEntry{}, errors.New("Error reading the current directory: Unknown.")
+		return []os.DirEntry{}, errors.New("Error reading directory: Unknown ¯\\_(ツ)_/¯")
 	}
 	return contents, nil
 }

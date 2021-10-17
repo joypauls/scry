@@ -12,7 +12,7 @@ import (
 
 // symbols for file
 const dirLabel = "📁"
-const fileLabel = "  "
+const fileLabel = "📄"
 
 // minimum for maxLength is 5 (/... leading, / trailing), enforce?
 func formatPath(p *fst.Path, maxLen int) string {
@@ -31,7 +31,7 @@ func formatPath(p *fst.Path, maxLen int) string {
 	return fmt.Sprintf("/...%s%c", clipped, fp.Separator)
 }
 
-func formatFile(f fst.File, p fst.Path) string {
+func formatFile(f fst.File, p *fst.Path) string {
 	label := fileLabel
 	if f.IsDir {
 		label = dirLabel
@@ -39,6 +39,7 @@ func formatFile(f fst.File, p fst.Path) string {
 	name := f.Name
 	// check for symlink
 	if f.IsSymLink {
+		// this should be done when the file is read
 		target, err := os.Readlink(fp.Join(p.String(), name))
 		if err != nil {
 			target = "?"

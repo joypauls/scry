@@ -1,9 +1,13 @@
 package app
 
 import (
+	"log"
 	"testing"
+	"testing/fstest"
+	"time"
 
 	"github.com/gdamore/tcell/v2"
+	"github.com/joypauls/scry/fst"
 )
 
 // only supporting this for now
@@ -21,6 +25,25 @@ func makeTestScreen(t *testing.T, charset string) tcell.SimulationScreen {
 		t.Fatalf("Failed to initialize screen: %v", e)
 	}
 	return s
+}
+
+var sysValue int
+
+// Emulating https://cs.opensource.google/go/go/+/refs/tags/go1.17.2:src/io/fs/readdir_test.go
+var testFs = fstest.MapFS{
+	"hello.txt": {
+		Data:    []byte("hello, world"),
+		Mode:    0456,
+		ModTime: time.Now(),
+		Sys:     &sysValue,
+	},
+	// MapFS implicitly adds the directory file "sub" for us
+	"sub/goodbye.txt": {
+		Data:    []byte("goodbye, world"),
+		Mode:    0456,
+		ModTime: time.Now(),
+		Sys:     &sysValue,
+	},
 }
 
 func TestDraw(t *testing.T) {
@@ -42,5 +65,36 @@ func TestDraw(t *testing.T) {
 	for _, table := range tables {
 		// doesn't throw an error so not sure how else to test this
 		draw(table.screen, table.x, table.y, table.style, table.text)
+		s.Show()
+	}
+}
+
+func TestDrawFile(t *testing.T) {
+	s := makeTestScreen(t, charset)
+	dirRaw, err := testFs.ReadDir(".")
+	if err != nil {
+		log.Fatal(err)
+	}
+	f := fst.MakeFile(dirRaw[0])
+	p := fst.NewPath(".")
+
+	// table of test cases
+	tables := []struct {
+		screen   tcell.Screen
+		x        int
+		y        int
+		selected bool
+		file     fst.File
+		path     *fst.Path
+	}{
+		{s, 0, 0, false, f, p},
+		{s, 10, 20, true, f, p},
+	}
+
+	// iterate over test tables
+	for _, table := range tables {
+		// doesn't throw an error so not sure how else to test this
+		drawFile(table.screen, table.x, table.y, table.selected, table.file, table.path)
+		s.Show()
 	}
 }

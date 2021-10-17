@@ -3,6 +3,7 @@
 package fst
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -14,8 +15,13 @@ import (
 func readDirectory(p *Path) ([]os.DirEntry, error) {
 	contents, err := os.ReadDir(p.String()) // DirEntry slice
 	if err != nil {
+		if os.IsPermission(err) {
+			return []os.DirEntry{}, errors.New("Error reading the current directory: Permission denied.")
+		}
 		// should handle this with more care
-		return []os.DirEntry{}, fmt.Errorf("Couldn't read the directory: %s", p.String())
+		// we don't need to display the path because it is on the top status bar
+		// return []os.DirEntry{}, fmt.Errorf("Couldn't read the directory: %s", p.String())
+		return []os.DirEntry{}, errors.New("Error reading the current directory: Unknown.")
 	}
 	return contents, nil
 }

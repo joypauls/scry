@@ -92,5 +92,5 @@ func main() {
 	}
 
 	// start the render loop
-	app.Run(config)
+	app.Render(config)
 }

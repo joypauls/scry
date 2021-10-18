@@ -104,3 +104,11 @@ func NewDirectory(p *Path, showHidden bool) *Directory {
 	d.Read(p, showHidden)
 	return d
 }
+
+// This is mostly for tests.
+func NewDirectoryFromSlice(dir []os.DirEntry, showHidden bool) *Directory {
+	d := new(Directory)
+	d.files = processDirectory(dir, showHidden)
+	d.size = len(dir)
+	return d
+}

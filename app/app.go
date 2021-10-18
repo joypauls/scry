@@ -45,24 +45,51 @@ func (app *App) ResetIndex() {
 	}
 }
 
-// Move to the current parent.
-func (app *App) GoToParent() {
-	app.path.Set(app.path.Parent())
+func (app *App) ScrollDown() {
+	if app.index == app.maxIndex {
+		if app.maxIndex+app.offset == app.Size()-1 {
+			app.index = 0
+			app.offset = 0
+		} else if app.maxIndex+app.offset < app.Size()-1 {
+			// keep index the same! (at bottom)
+			app.offset++
+		}
+	} else {
+		app.AddIndex(1)
+	}
+}
+
+func (app *App) ScrollUp() {
+	if app.index == 0 {
+		if app.offset == 0 {
+			app.index = app.maxIndex
+			app.offset = (app.Size() - 1) - app.maxIndex
+		} else if app.offset > 0 {
+			// keep index the same (at top)
+			app.offset--
+		}
+	} else {
+		app.AddIndex(-1)
+	}
+}
+
+func (app *App) Walk(p *fst.Path) {
+	app.path.Set(p.String())
 	app.Read(app.path, app.ShowHidden)
 	app.ResetIndex()
 	app.offset = 0
 }
 
 // Move to the current selection if it's a directory, otherwise do nothing.
-func (app *App) GoToChild() {
+func (app *App) WalkToChild() {
 	if !app.IsEmpty() {
 		f := app.File(app.index + app.offset) // pointer to a File
 		if f.IsDir {
+			// this is kinda hacky
 			app.path.Set(fp.Join(app.path.String(), f.Name))
-			app.Read(app.path, app.ShowHidden)
-			app.ResetIndex()
-			app.offset = 0
-		} // else do nothing
+			app.Walk(app.path)
+		}
+		// else do nothing
 	}
 }
 

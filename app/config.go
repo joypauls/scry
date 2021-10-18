@@ -14,6 +14,7 @@ type Config struct {
 	UseEmoji   bool      `yaml:"use-emoji"`
 	InitDir    *fst.Path // where scry is initialized
 	Home       *fst.Path // actual user home directory
+	// Add in special character handling here, charsets, emoji swaps, etc.
 }
 
 func (c Config) Parse(file string) Config {

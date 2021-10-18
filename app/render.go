@@ -61,48 +61,22 @@ renderloop:
 				quit()
 				break renderloop
 			} else if ev.Key() == tcell.KeyDown {
-				// handle scrolling down
-				if app.index == app.maxIndex {
-					if app.maxIndex+app.offset == app.Size()-1 {
-						app.index = 0
-						app.offset = 0
-					} else if app.maxIndex+app.offset < app.Size()-1 {
-						// keep index the same! (at bottom)
-						app.offset++
-					}
-				} else {
-					app.AddIndex(1)
-				}
+				app.ScrollDown()
 			} else if ev.Key() == tcell.KeyUp {
-				// handle scrolling up
-				if app.index == 0 {
-					if app.offset == 0 {
-						app.index = app.maxIndex
-						app.offset = (app.Size() - 1) - app.maxIndex
-					} else if app.offset > 0 {
-						// keep index the same (at top)
-						app.offset--
-					}
-				} else {
-					app.AddIndex(-1)
-				}
+				app.ScrollUp()
 			} else if ev.Key() == tcell.KeyLeft {
-				app.GoToParent()
+				// we change the path but that's all so we have to walk to it still
+				app.path.ToParent()
+				app.Walk(app.path)
 			} else if ev.Key() == tcell.KeyRight {
-				app.GoToChild()
+				app.WalkToChild()
 			} else if ev.Key() == tcell.KeyRune {
 				if ev.Rune() == 'h' || ev.Rune() == 'H' {
 					// go to user home directory (if it was found)
-					app.path.Set(app.Home.String())
-					app.Read(app.path, app.ShowHidden)
-					app.ResetIndex()
-					app.offset = 0
+					app.Walk(app.Home)
 				} else if ev.Rune() == 'b' || ev.Rune() == 'B' {
 					// go to initial directory
-					app.path.Set(app.InitDir.String())
-					app.Read(app.path, app.ShowHidden)
-					app.ResetIndex()
-					app.offset = 0
+					app.Walk(app.InitDir)
 				}
 			}
 		case *tcell.EventError:

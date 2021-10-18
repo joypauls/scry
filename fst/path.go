@@ -23,12 +23,16 @@ func (p *Path) Set(s string) {
 	p.path = cleaned
 }
 
+func (p *Path) ToParent() {
+	p.Set(p.Parent())
+}
+
 // String() must always keep compatibility with path/filepath pkg
 func (p *Path) String() string {
 	return p.path
 }
 
-// should this return a Path??
+// Should this return a Path? Is a string ever helpful?
 func (p *Path) Parent() string {
 	return fp.Dir(p.path)
 }

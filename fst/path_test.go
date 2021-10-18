@@ -69,3 +69,16 @@ func TestPathParent(t *testing.T) {
 		t.Errorf("got %q, wanted %q", got, want)
 	}
 }
+
+func TestPathToParent(t *testing.T) {
+	// setup
+	s := "/usr/src/app"
+	p := NewPath(s)
+	// test
+	p.ToParent()
+	got := p.String()
+	want := "/usr/src"
+	if got != want {
+		t.Errorf("got %q, wanted %q", got, want)
+	}
+}

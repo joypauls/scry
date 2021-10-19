@@ -19,7 +19,7 @@ type App struct {
 	Layout
 	*fst.Directory
 	Config
-	path     *fst.Path
+	Path     *fst.Path
 	index    int // 0 <= index < maxIndex
 	maxIndex int
 	offset   int // start of window
@@ -74,8 +74,8 @@ func (app *App) ScrollUp() {
 }
 
 func (app *App) Walk(p *fst.Path) {
-	app.path.Set(p.String())
-	app.Read(app.path, app.ShowHidden)
+	app.Path.Set(p.String())
+	app.Read(app.Path, app.ShowHidden)
 	app.ResetIndex()
 	app.offset = 0
 }
@@ -86,8 +86,8 @@ func (app *App) WalkToChild() {
 		f := app.File(app.index + app.offset) // pointer to a File
 		if f.IsDir {
 			// this is kinda hacky
-			app.path.Set(fp.Join(app.path.String(), f.Name))
-			app.Walk(app.path)
+			app.Path.Set(fp.Join(app.Path.String(), f.Name))
+			app.Walk(app.Path)
 		}
 		// else do nothing
 	}
@@ -117,7 +117,7 @@ func NewApp(s tcell.Screen, c Config) *App {
 		Directory: fst.NewDirectory(c.InitDir, c.ShowHidden),
 		Config:    c,
 	}
-	app.path = c.InitDir.Copy()
+	app.Path = c.InitDir.Copy()
 	app.index = 0
 	app.maxIndex = minInt(app.windowHeight-1, app.Size()-1)
 	app.offset = 0

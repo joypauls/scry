@@ -66,8 +66,8 @@ renderloop:
 				app.ScrollUp()
 			} else if ev.Key() == tcell.KeyLeft {
 				// we change the path but that's all so we have to walk to it still
-				app.path.ToParent()
-				app.Walk(app.path)
+				app.Path.ToParent()
+				app.Walk(app.Path)
 			} else if ev.Key() == tcell.KeyRight {
 				app.WalkToChild()
 			} else if ev.Key() == tcell.KeyRune {

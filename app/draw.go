@@ -29,7 +29,7 @@ func drawFile(s tcell.Screen, x, y int, selected bool, f fst.File, p *fst.Path) 
 func drawFrame(s tcell.Screen, app *App) {
 	// top bar content
 	maxHeaderLen := (7 * app.width) / 10 // 70% of width
-	header := formatPath(app.path, maxHeaderLen)
+	header := formatPath(app.Path, maxHeaderLen)
 	if app.UseEmoji {
 		header = "🔮 " + header
 	}
@@ -57,7 +57,7 @@ func drawWindow(s tcell.Screen, app *App) {
 			app.yStart+i,
 			i == app.index,
 			*app.File(i + app.offset),
-			app.path,
+			app.Path,
 		)
 	}
 }

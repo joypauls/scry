@@ -2,51 +2,15 @@ package app
 
 import (
 	"testing"
-	"testing/fstest"
-	"time"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/joypauls/scry/fst"
+	tu "github.com/joypauls/scry/internal"
 )
 
-var sysValue int
-
-// only supporting this for now
-var charset = "UTF-8"
-
-// var defStyle = tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorReset)
-
-// Emulating https://cs.opensource.google/go/go/+/refs/tags/go1.17.2:src/io/fs/readdir_test.go
-var testFs = fstest.MapFS{
-	"hello.txt": {
-		Data:    []byte("hello, world"),
-		Mode:    0456,
-		ModTime: time.Now(),
-		Sys:     &sysValue,
-	},
-	// MapFS implicitly adds the directory file "sub" for us
-	"sub/goodbye.txt": {
-		Data:    []byte("goodbye, world"),
-		Mode:    0456,
-		ModTime: time.Now(),
-		Sys:     &sysValue,
-	},
-}
-
-// Lifted from https://github.com/gdamore/tcell/blob/master/sim_test.go
-func makeTestScreen(t *testing.T, charset string) tcell.SimulationScreen {
-	s := tcell.NewSimulationScreen(charset)
-	if s == nil {
-		t.Fatalf("Failed to get simulation screen")
-	}
-	if e := s.Init(); e != nil {
-		t.Fatalf("Failed to initialize screen: %v", e)
-	}
-	return s
-}
-
-func makeTestApp(t *testing.T) *App {
-	dirRaw, err := testFs.ReadDir(".")
+func makeBasicApp(t *testing.T) *App {
+	testFS := tu.GetTestFS()
+	dirRaw, err := testFS.ReadDir(".")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -58,13 +22,13 @@ func makeTestApp(t *testing.T) *App {
 		Layout:    MakeLayout(100, 50),
 		Directory: fst.NewDirectoryFromSlice(dirRaw, false),
 		Config:    c,
-		path:      fst.NewPath("."),
+		Path:      fst.NewPath("."),
 	}
 	return app
 }
 
 func TestDraw(t *testing.T) {
-	s := makeTestScreen(t, charset)
+	s := tu.MakeTestScreen(t)
 	// table of test cases
 	tables := []struct {
 		screen tcell.Screen
@@ -87,8 +51,8 @@ func TestDraw(t *testing.T) {
 }
 
 func TestDrawFile(t *testing.T) {
-	s := makeTestScreen(t, charset)
-	dirRaw, err := testFs.ReadDir(".")
+	s := tu.MakeTestScreen(t)
+	dirRaw, err := testFS.ReadDir(".")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -117,8 +81,8 @@ func TestDrawFile(t *testing.T) {
 }
 
 func TestDrawFrame(t *testing.T) {
-	s := makeTestScreen(t, charset)
-	app := makeTestApp(t)
+	s := tu.MakeTestScreen(t)
+	app := makeBasicApp(t)
 
 	// doesn't throw an error so not sure how else to test this
 	drawFrame(s, app)
@@ -126,8 +90,8 @@ func TestDrawFrame(t *testing.T) {
 }
 
 func TestDrawWindow(t *testing.T) {
-	s := makeTestScreen(t, charset)
-	app := makeTestApp(t)
+	s := tu.MakeTestScreen(t)
+	app := makeBasicApp(t)
 
 	// doesn't throw an error so not sure how else to test this
 	drawWindow(s, app)

@@ -12,31 +12,52 @@ import (
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/joypauls/scry/fst"
+	"github.com/mattn/go-runewidth"
 )
+
+// Set default text style
+
+// this global config sucks let's get rid of it please
+// should just handle all this in config setup?
+var defStyle = tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorReset)
+var selStyle = tcell.StyleDefault.Foreground(tcell.ColorWhite).Background(tcell.ColorBlueViolet)
+
+var arrowLeft = '←'
+var arrowRight = '→'
+var arrowUp = '▲'
+var arrowDown = '▼'
+
+// initialize one time display-related configs at program start
+// this could probably be a configuration struct
+// after everything is declared
+func init() {
+	if runewidth.EastAsianWidth {
+		arrowLeft = '<'
+		arrowRight = '>'
+	}
+}
 
 // Main object managing the app functionality and display.
 type App struct {
 	Layout
 	*fst.Directory
 	Config
-	Path     *fst.Path
+	Path *fst.Path
+	// these below are critical to protect
 	index    int // 0 <= index < maxIndex
-	maxIndex int
 	offset   int // start of window
+	maxIndex int
 }
 
-func (app *App) Index() int {
-	return app.index
-}
-
-func (app *App) AddIndex(change int) {
+func (app *App) addIndex(change int) {
 	// meeting this condition means that there cur dir is empty
-	if app.index != 0 || app.maxIndex != 0 {
+	// if app.index != 0 || app.maxIndex != 0 {
+	if !app.IsEmpty() {
 		app.index = minInt(maxInt(app.index+change, 0), app.maxIndex)
 	}
 }
 
-func (app *App) ResetIndex() {
+func (app *App) resetIndex() {
 	app.index = 0
 	if app.IsEmpty() {
 		app.maxIndex = 0
@@ -45,7 +66,11 @@ func (app *App) ResetIndex() {
 	}
 }
 
-func (app *App) ScrollDown() {
+func (app *App) Index() int {
+	return app.index
+}
+
+func (app *App) ShiftDown() {
 	if app.index == app.maxIndex {
 		if app.maxIndex+app.offset == app.Size()-1 {
 			app.index = 0
@@ -55,11 +80,11 @@ func (app *App) ScrollDown() {
 			app.offset++
 		}
 	} else {
-		app.AddIndex(1)
+		app.addIndex(1)
 	}
 }
 
-func (app *App) ScrollUp() {
+func (app *App) ShiftUp() {
 	if app.index == 0 {
 		if app.offset == 0 {
 			app.index = app.maxIndex
@@ -69,14 +94,14 @@ func (app *App) ScrollUp() {
 			app.offset--
 		}
 	} else {
-		app.AddIndex(-1)
+		app.addIndex(-1)
 	}
 }
 
 func (app *App) Walk(p *fst.Path) {
 	app.Path.Set(p.String())
 	app.Read(app.Path, app.ShowHidden)
-	app.ResetIndex()
+	app.resetIndex()
 	app.offset = 0
 }
 
@@ -96,7 +121,7 @@ func (app *App) WalkToChild() {
 // this should handle all drawing on the screen
 func (app *App) Draw(s tcell.Screen) {
 	drawFrame(s, app)
-	if app.Problem() {
+	if app.IsProblem() {
 		draw(s, app.xStart, app.yStart, defStyle, app.Error())
 	} else if app.IsEmpty() {
 		draw(s, app.xStart, app.yStart, defStyle, "<EMPTY>")
@@ -118,8 +143,6 @@ func NewApp(s tcell.Screen, c Config) *App {
 		Config:    c,
 	}
 	app.Path = c.InitDir.Copy()
-	app.index = 0
 	app.maxIndex = minInt(app.windowHeight-1, app.Size()-1)
-	app.offset = 0
 	return app
 }

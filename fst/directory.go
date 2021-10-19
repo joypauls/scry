@@ -79,7 +79,7 @@ func (d *Directory) IsEmpty() bool {
 	return d.size == 0
 }
 
-func (d *Directory) Problem() bool {
+func (d *Directory) IsProblem() bool {
 	return d.err != nil
 }
 
@@ -109,6 +109,7 @@ func NewDirectory(p *Path, showHidden bool) *Directory {
 func NewDirectoryFromSlice(dir []os.DirEntry, showHidden bool) *Directory {
 	d := new(Directory)
 	d.files = processDirectory(dir, showHidden)
-	d.size = len(dir)
+	d.size = len(d.files)
+	d.SortNameDesc()
 	return d
 }

@@ -29,9 +29,12 @@ Path:
 
 Flags:`
 
-func customUsageText() {
-	fmt.Fprintf(os.Stderr, "%s\n\n", titleText)
-	fmt.Fprintln(os.Stderr, helpText)
+func formatUsageText() string {
+	return fmt.Sprintf("%s\n\n%s", titleText, helpText)
+}
+
+func printUsageText() {
+	fmt.Fprintln(os.Stderr, formatUsageText())
 	flag.PrintDefaults()
 }
 
@@ -63,7 +66,7 @@ func main() {
 	config = config.Parse(configFile)
 
 	// set custom usage output (-h or --help)
-	flag.Usage = customUsageText
+	flag.Usage = printUsageText
 
 	// parse flags
 	useEmojiFlag := flag.Bool("e", false, "Use emoji in UI (sparingly)")
@@ -92,5 +95,5 @@ func main() {
 	}
 
 	// start the render loop
-	app.Render(config)
+	Render(config)
 }

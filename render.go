@@ -1,37 +1,21 @@
 // Main program loop and user interactions.
 // Primary entrypoint for the fun stuff.
-package app
+package main
 
 import (
 	"log"
 
 	"github.com/gdamore/tcell/v2"
-	"github.com/mattn/go-runewidth"
+	"github.com/joypauls/scry/app"
 )
 
-// Set default text style
+var defaultStyle = tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorReset)
 
-// this global config sucks let's get rid of it please
-// should just handle all this in config setup?
-var defStyle = tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorReset)
-var selStyle = tcell.StyleDefault.Foreground(tcell.ColorWhite).Background(tcell.ColorBlueViolet)
+// func handleKeyboardEvents(app *app.App) tcell.Event {
 
-var arrowLeft = '←'
-var arrowRight = '→'
-var arrowUp = '▲'
-var arrowDown = '▼'
+// }
 
-// initialize one time display-related configs at program start
-// this could probably be a configuration struct
-// after everything is declared
-func init() {
-	if runewidth.EastAsianWidth {
-		arrowLeft = '<'
-		arrowRight = '>'
-	}
-}
-
-func Render(c Config) {
+func Render(c app.Config) {
 	s, err := tcell.NewScreen()
 	if err != nil {
 		log.Fatalf("%+v", err)
@@ -39,11 +23,11 @@ func Render(c Config) {
 	if err := s.Init(); err != nil {
 		log.Fatalf("%+v", err)
 	}
-	s.SetStyle(defStyle)
+	s.SetStyle(defaultStyle)
 	s.Clear()
 
 	// initialize app object
-	app := NewApp(s, c)
+	app := app.NewApp(s, c)
 	// draw the ui for the first time
 	app.Refresh(s)
 	quit := func() { s.Fini() }
@@ -53,6 +37,7 @@ renderloop:
 		s.Show()            // Update screen
 		ev := s.PollEvent() // Poll event
 
+		// abstract out to test
 		switch ev := ev.(type) {
 		case *tcell.EventResize:
 			s.Sync()
@@ -61,9 +46,9 @@ renderloop:
 				quit()
 				break renderloop
 			} else if ev.Key() == tcell.KeyDown {
-				app.ScrollDown()
+				app.ShiftDown()
 			} else if ev.Key() == tcell.KeyUp {
-				app.ScrollUp()
+				app.ShiftUp()
 			} else if ev.Key() == tcell.KeyLeft {
 				// we change the path but that's all so we have to walk to it still
 				app.Path.ToParent()

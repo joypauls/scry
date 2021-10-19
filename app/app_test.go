@@ -1,6 +1,7 @@
 package app
 
 import (
+	"os"
 	"testing"
 
 	"github.com/joypauls/scry/fst"
@@ -9,7 +10,7 @@ import (
 
 var testFS = tu.GetTestFS()
 
-func makeNormalApp(t *testing.T) *App {
+func makeFullApp(t *testing.T) *App {
 	dirRaw, err := testFS.ReadDir(".")
 	if err != nil {
 		t.Fatal(err)
@@ -24,76 +25,131 @@ func makeNormalApp(t *testing.T) *App {
 		Config:    c,
 		Path:      fst.NewPath("."),
 	}
+	app.maxIndex = app.Size() - 1 // slightly different logic but meh
 	return app
 }
 
-// func TestDraw(t *testing.T) {
-// 	s := makeTestScreen(t, charset)
-// 	// table of test cases
-// 	tables := []struct {
-// 		screen tcell.Screen
-// 		x      int
-// 		y      int
-// 		style  tcell.Style
-// 		text   string
-// 	}{
-// 		{s, 0, 0, defStyle, "some test text "},
-// 		{s, 10, 20, defStyle, "/test/path/display/"},
-// 		{s, 0, 30, defStyle, "📁 file 📁 stuff 📁 emoji 📁"},
-// 	}
+func makeEmptyApp(t *testing.T) *App {
+	dirRaw := []os.DirEntry{}
+	c := Config{
+		ShowHidden: false,
+		UseEmoji:   true,
+	}
+	app := &App{
+		Layout:    MakeLayout(100, 50),
+		Directory: fst.NewDirectoryFromSlice(dirRaw, false),
+		Config:    c,
+		Path:      fst.NewPath("."),
+		maxIndex:  len(dirRaw), // slightly different logic but meh
+	}
+	return app
+}
 
-// 	// iterate over test tables
-// 	for _, table := range tables {
-// 		// doesn't throw an error so not sure how else to test this
-// 		draw(table.screen, table.x, table.y, table.style, table.text)
-// 		s.Show()
-// 	}
-// }
+func TestAppIndex(t *testing.T) {
+	app := makeFullApp(t)
 
-// func TestDrawFile(t *testing.T) {
-// 	s := makeTestScreen(t, charset)
-// 	dirRaw, err := testFs.ReadDir(".")
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
-// 	f := fst.MakeFile(dirRaw[0])
-// 	p := fst.NewPath(".")
+	// starting value
+	if res, exp := app.Index(), 0; res != exp {
+		t.Errorf("Result: %d, Expected: %d", res, exp)
+	}
 
-// 	// table of test cases
-// 	tables := []struct {
-// 		screen   tcell.Screen
-// 		x        int
-// 		y        int
-// 		selected bool
-// 		file     fst.File
-// 		path     *fst.Path
-// 	}{
-// 		{s, 0, 0, false, f, p},
-// 		{s, 10, 20, true, f, p},
-// 	}
+	// incremented value
+	app.addIndex(1)
+	if res, exp := app.Index(), 1; res != exp {
+		t.Errorf("Result: %d, Expected: %d", res, exp)
+	}
 
-// 	// iterate over test tables
-// 	for _, table := range tables {
-// 		// doesn't throw an error so not sure how else to test this
-// 		drawFile(table.screen, table.x, table.y, table.selected, table.file, table.path)
-// 		s.Show()
-// 	}
-// }
+	// decremented value
+	app.addIndex(-1)
+	if res, exp := app.Index(), 0; res != exp {
+		t.Errorf("Result: %d, Expected: %d", res, exp)
+	}
+}
 
-// func TestDrawFrame(t *testing.T) {
-// 	s := makeTestScreen(t, charset)
-// 	app := makeTestApp(t)
+func TestAppResetIndex(t *testing.T) {
+	// stuff in the directory
+	app := makeFullApp(t)
+	app.addIndex(100)
+	app.resetIndex()
+	if res, exp := app.Index(), 0; res != exp {
+		t.Errorf("Result: %d, Expected: %d", res, exp)
+	}
 
-// 	// doesn't throw an error so not sure how else to test this
-// 	drawFrame(s, app)
-// 	s.Show()
-// }
+	// empty directory
+	app = makeEmptyApp(t)
+	app.addIndex(100)
+	app.resetIndex()
+	if res, exp := app.Index(), 0; res != exp {
+		t.Errorf("Result: %d, Expected: %d", res, exp)
+	}
+}
 
-// func TestDrawWindow(t *testing.T) {
-// 	s := makeTestScreen(t, charset)
-// 	app := makeTestApp(t)
+func TestAppShifting(t *testing.T) {
+	app := makeFullApp(t)
 
-// 	// doesn't throw an error so not sure how else to test this
-// 	drawWindow(s, app)
-// 	s.Show()
-// }
+	// normal scrolling
+	app.addIndex(1)
+	app.ShiftUp()
+	if res, exp := app.Index(), 0; res != exp {
+		t.Errorf("Result: %d, Expected: %d", res, exp)
+	}
+
+	// loop around to last element
+	app.ShiftUp()
+	if res, exp := app.Index(), 2; res != exp {
+		t.Errorf("Result: %d, Expected: %d", res, exp)
+	}
+
+	// move offset when there is one
+	app.resetIndex()
+	app.maxIndex = 1
+	app.offset = 1
+	app.ShiftUp()
+	if res, exp := app.offset, 0; res != exp {
+		t.Errorf("Result: %d, Expected: %d", res, exp)
+	}
+
+	app.resetIndex()
+
+	// normal scrolling
+	app.addIndex(1)
+	app.ShiftDown()
+	if res, exp := app.Index(), 2; res != exp {
+		t.Errorf("Result: %d, Expected: %d", res, exp)
+	}
+
+	// loop around to first element
+	app.ShiftDown()
+	if res, exp := app.Index(), 0; res != exp {
+		t.Errorf("Result: %d, Expected: %d", res, exp)
+	}
+
+	// shift offset when at bottom and it's not at maximum
+	app.resetIndex()
+	app.addIndex(1)
+	app.maxIndex = 1
+	app.ShiftDown()
+	if res, exp := app.offset, 1; res != exp {
+		t.Errorf("Result: %d, Expected: %d", res, exp)
+	}
+}
+
+func TestAppDraw(t *testing.T) {
+	app := makeFullApp(t)
+	s := tu.MakeTestScreen(t)
+
+	// not a very useful test
+	app.Draw(s)
+
+	// not a very useful test
+	app = makeEmptyApp(t)
+	app.Draw(s)
+}
+
+func TestAppRefresh(t *testing.T) {
+	app := makeFullApp(t)
+	s := tu.MakeTestScreen(t)
+
+	// not a very useful test
+	app.Refresh(s)
+}

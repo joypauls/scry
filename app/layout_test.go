@@ -8,8 +8,8 @@ func TestMakeLayout(t *testing.T) {
 	expectedW := 20
 	expectedH := 10
 	if result.width != expectedW {
-		t.Errorf("Result: %d, Wanted: %d", result.width, expectedW)
+		t.Errorf("Result: %d, Expected: %d", result.width, expectedW)
 	} else if result.height != expectedH {
-		t.Errorf("Result: %d, Wanted: %d", result.height, expectedH)
+		t.Errorf("Result: %d, Expected: %d", result.height, expectedH)
 	}
 }

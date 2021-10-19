@@ -63,6 +63,6 @@ func TestFormatFileRegular(t *testing.T) {
 	result := formatFile(testFile, testPath)
 	expected := fmt.Sprintf("%s 10-01-21  0777  12.3 KB    test.go ", fileLabel)
 	if result != expected {
-		t.Errorf("Result: %s, Wanted: %s", result, expected)
+		t.Errorf("Result: %s, Expected: %s", result, expected)
 	}
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/joypauls/scry/app"
@@ -30,5 +31,12 @@ func TestParseArgs(t *testing.T) {
 	want = fst.NewPath(wd)
 	if *got != *want {
 		t.Errorf("got %q, wanted %q", *got, *want)
+	}
+}
+
+func TestUsageText(t *testing.T) {
+	numLines := strings.Count(formatUsageText(), "\n")
+	if res, exp := numLines, 10; res != exp {
+		t.Errorf("Result: %d, Expected: %d", res, exp)
 	}
 }

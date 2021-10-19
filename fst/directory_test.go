@@ -17,10 +17,22 @@ var testFs = fstest.MapFS{
 		ModTime: time.Now(),
 		Sys:     &sysValue,
 	},
+	".env": {
+		Data:    []byte("hello, world"),
+		Mode:    0775,
+		ModTime: time.Now(),
+		Sys:     &sysValue,
+	},
 	// MapFS implicitly adds the directory file "sub" for us
 	"sub/goodbye.txt": {
 		Data:    []byte("goodbye, world"),
 		Mode:    0456,
+		ModTime: time.Now(),
+		Sys:     &sysValue,
+	},
+	"model.py": {
+		Data:    []byte("hello, world"),
+		Mode:    0775,
 		ModTime: time.Now(),
 		Sys:     &sysValue,
 	},
@@ -54,45 +66,70 @@ func TestProcessDirectory(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	dirProcessed := processDirectory(dirRaw, true)
 
-	result := len(dirProcessed)
-	expected := 2
-	if result != expected {
-		t.Errorf("Result: %d, Wanted: %d", result, expected)
+	// no dot files
+	dirProcessed := processDirectory(dirRaw, false)
+	res := len(dirProcessed)
+	exp := 3
+	if res != exp {
+		t.Errorf("Result: %d, Expected: %d", res, exp)
+	}
+	// show dot files
+	dirProcessed = processDirectory(dirRaw, true)
+	res = len(dirProcessed)
+	exp = 4
+	if res != exp {
+		t.Errorf("Result: %d, Expected: %d", res, exp)
 	}
 }
 
 func TestDirectory(t *testing.T) {
 	dirRaw, err := testFs.ReadDir(".")
 	if err != nil {
-		log.Fatal(err)
+		t.Fatal(err)
 	}
-	dirProcessed := processDirectory(dirRaw, true)
-	// kinda hacky, should refactor d.Read() so that it works on FS interface to use MapFS
-	d := Directory{
-		files: dirProcessed,
-		size:  len(dirProcessed),
-	}
-	d.SortNameDesc() // standardize
+	d := NewDirectoryFromSlice(dirRaw, false)
 
-	if res, exp := d.Size(), 2; res != exp {
-		t.Errorf("Result: %d, Wanted: %d", res, exp)
+	if res, exp := d.Size(), 3; res != exp {
+		t.Errorf("Result: %d, Expected: %d", res, exp)
 	}
 
 	if res, exp := d.IsEmpty(), false; res != exp {
-		t.Errorf("Result: %t, Wanted: %t", res, exp)
+		t.Errorf("Result: %t, Expected: %t", res, exp)
+	}
+
+	if res, exp := d.IsProblem(), false; res != exp {
+		t.Errorf("Result: %t, Expected: %t", res, exp)
 	}
 
 	// test index-based file selection
 	f := d.File(0)
 	if res, exp := f.Name, "hello.txt"; res != exp {
-		t.Errorf("Result: %s, Wanted: %s", res, exp)
+		t.Errorf("Result: %s, Expected: %s", res, exp)
 	}
 
-	// test alternative for previous
+	// test grabbing all files
 	files := d.Files()
-	if res, exp := files[1].Name, "sub"; res != exp {
-		t.Errorf("Result: %s, Wanted: %s", res, exp)
+	if res, exp := files[0].Name, "hello.txt"; res != exp {
+		t.Errorf("Result: %s, Expected: %s", res, exp)
+	}
+}
+
+func TestDirectorySorting(t *testing.T) {
+	dirRaw, err := testFs.ReadDir(".")
+	if err != nil {
+		t.Fatal(err)
+	}
+	d := new(Directory)
+	d.files = processDirectory(dirRaw, false)
+	d.size = len(d.files)
+	d.SortNameDesc()
+
+	if res, exp := d.File(0).Name, "hello.txt"; res != exp {
+		t.Errorf("Result: %s, Expected: %s", res, exp)
+	}
+
+	if res, exp := d.File(2).Name, "sub"; res != exp {
+		t.Errorf("Result: %s, Expected: %s", res, exp)
 	}
 }

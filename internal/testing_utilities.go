@@ -24,10 +24,22 @@ var testFS = fstest.MapFS{
 		ModTime: time.Now(),
 		Sys:     &sysValue,
 	},
+	"model.py": {
+		Data:    []byte("hello, world"),
+		Mode:    0775,
+		ModTime: time.Now(),
+		Sys:     &sysValue,
+	},
+	".env": {
+		Data:    []byte("hello, world"),
+		Mode:    0456,
+		ModTime: time.Now(),
+		Sys:     &sysValue,
+	},
 	// MapFS implicitly adds the directory file "sub" for us
 	"sub/goodbye.txt": {
 		Data:    []byte("goodbye, world"),
-		Mode:    0456,
+		Mode:    0775,
 		ModTime: time.Now(),
 		Sys:     &sysValue,
 	},
@@ -36,6 +48,10 @@ var testFS = fstest.MapFS{
 func GetTestFS() fstest.MapFS {
 	return testFS
 }
+
+// func GetEmptyTestFS() fstest.MapFS {
+// 	return emptyTestFS
+// }
 
 // Lifted from https://github.com/gdamore/tcell/blob/master/sim_test.go
 func MakeTestScreen(t *testing.T) tcell.SimulationScreen {

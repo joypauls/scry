@@ -18,13 +18,14 @@ const (
 )
 
 func (b BytesSI) String() string {
+	// can't even represent numbers in the etabyte range with float64 so don't support now
 	switch {
-	case b >= YB:
-		return fmt.Sprintf("%.1f YB", b/YB)
-	case b >= ZB:
-		return fmt.Sprintf("%.1f ZB", b/ZB)
-	case b >= EB:
-		return fmt.Sprintf("%.1f EB", b/EB)
+	// case b >= YB:
+	// 	return fmt.Sprintf("%.1f YB", b/YB)
+	// case b >= ZB:
+	// 	return fmt.Sprintf("%.1f ZB", b/ZB)
+	// case b >= EB:
+	// 	return fmt.Sprintf("%.1f EB", b/EB)
 	case b >= PB:
 		return fmt.Sprintf("%.1f PB", b/PB)
 	case b >= TB:

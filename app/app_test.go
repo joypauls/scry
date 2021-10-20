@@ -5,10 +5,10 @@ import (
 	"testing"
 
 	"github.com/joypauls/scry/fst"
-	tu "github.com/joypauls/scry/internal"
+	misc "github.com/joypauls/scry/internal"
 )
 
-var testFS = tu.GetTestFS()
+var testFS = misc.GetTestFS()
 
 func makeFullApp(t *testing.T) *App {
 	dirRaw, err := testFS.ReadDir(".")
@@ -136,7 +136,7 @@ func TestAppShifting(t *testing.T) {
 
 func TestAppDraw(t *testing.T) {
 	app := makeFullApp(t)
-	s := tu.MakeTestScreen(t)
+	s := misc.MakeTestScreen(t)
 
 	// not a very useful test
 	app.Draw(s)
@@ -148,7 +148,7 @@ func TestAppDraw(t *testing.T) {
 
 func TestAppRefresh(t *testing.T) {
 	app := makeFullApp(t)
-	s := tu.MakeTestScreen(t)
+	s := misc.MakeTestScreen(t)
 
 	// not a very useful test
 	app.Refresh(s)

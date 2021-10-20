@@ -95,5 +95,5 @@ func main() {
 	}
 
 	// start the render loop
-	Render(config)
+	render(config)
 }

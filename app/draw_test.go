@@ -5,11 +5,11 @@ import (
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/joypauls/scry/fst"
-	tu "github.com/joypauls/scry/internal"
+	misc "github.com/joypauls/scry/internal"
 )
 
 func makeBasicApp(t *testing.T) *App {
-	testFS := tu.GetTestFS()
+	testFS := misc.GetTestFS()
 	dirRaw, err := testFS.ReadDir(".")
 	if err != nil {
 		t.Fatal(err)
@@ -28,7 +28,7 @@ func makeBasicApp(t *testing.T) *App {
 }
 
 func TestDraw(t *testing.T) {
-	s := tu.MakeTestScreen(t)
+	s := misc.MakeTestScreen(t)
 	// table of test cases
 	tables := []struct {
 		screen tcell.Screen
@@ -51,7 +51,7 @@ func TestDraw(t *testing.T) {
 }
 
 func TestDrawFile(t *testing.T) {
-	s := tu.MakeTestScreen(t)
+	s := misc.MakeTestScreen(t)
 	dirRaw, err := testFS.ReadDir(".")
 	if err != nil {
 		t.Fatal(err)
@@ -81,7 +81,7 @@ func TestDrawFile(t *testing.T) {
 }
 
 func TestDrawFrame(t *testing.T) {
-	s := tu.MakeTestScreen(t)
+	s := misc.MakeTestScreen(t)
 	app := makeBasicApp(t)
 
 	// doesn't throw an error so not sure how else to test this
@@ -90,7 +90,7 @@ func TestDrawFrame(t *testing.T) {
 }
 
 func TestDrawWindow(t *testing.T) {
-	s := tu.MakeTestScreen(t)
+	s := misc.MakeTestScreen(t)
 	app := makeBasicApp(t)
 
 	// doesn't throw an error so not sure how else to test this

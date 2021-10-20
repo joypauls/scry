@@ -3,6 +3,7 @@
 package main
 
 import (
+	"errors"
 	"log"
 
 	"github.com/gdamore/tcell/v2"
@@ -11,11 +12,43 @@ import (
 
 var defaultStyle = tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorReset)
 
-// func handleKeyboardEvents(app *app.App) tcell.Event {
+func handleKeyEvent(e tcell.Event, s tcell.Screen, app *app.App) error {
+	quit := func() { s.Fini() }
+	// abstract out to test
+	switch e := e.(type) {
+	case *tcell.EventResize:
+		s.Sync()
+	case *tcell.EventKey:
+		if e.Key() == tcell.KeyEscape || e.Key() == tcell.KeyCtrlC {
+			quit()
+			return errors.New("User closed the app. Nothing to do.")
+		} else if e.Key() == tcell.KeyDown {
+			app.ShiftDown()
+		} else if e.Key() == tcell.KeyUp {
+			app.ShiftUp()
+		} else if e.Key() == tcell.KeyLeft {
+			// we change the path but that's all so we have to walk to it still
+			app.Path.ToParent()
+			app.Walk(app.Path)
+		} else if e.Key() == tcell.KeyRight {
+			app.WalkToChild()
+		} else if e.Key() == tcell.KeyRune {
+			if e.Rune() == 'h' || e.Rune() == 'H' {
+				// go to user home directory (if it was found)
+				app.Walk(app.Home)
+			} else if e.Rune() == 'b' || e.Rune() == 'B' {
+				// go to initial directory
+				app.Walk(app.InitDir)
+			}
+		}
+	case *tcell.EventError:
+		// can we access the actual tcell error? idk
+		log.Fatal("Panic! At The Unknown Input") // os.Exit(1) follows log.Fatal()
+	}
+	return nil
+}
 
-// }
-
-func Render(c app.Config) {
+func render(c app.Config) {
 	s, err := tcell.NewScreen()
 	if err != nil {
 		log.Fatalf("%+v", err)
@@ -30,43 +63,14 @@ func Render(c app.Config) {
 	app := app.NewApp(s, c)
 	// draw the ui for the first time
 	app.Refresh(s)
-	quit := func() { s.Fini() }
 
 renderloop:
 	for {
-		s.Show()            // Update screen
-		ev := s.PollEvent() // Poll event
-
-		// abstract out to test
-		switch ev := ev.(type) {
-		case *tcell.EventResize:
-			s.Sync()
-		case *tcell.EventKey:
-			if ev.Key() == tcell.KeyEscape || ev.Key() == tcell.KeyCtrlC {
-				quit()
-				break renderloop
-			} else if ev.Key() == tcell.KeyDown {
-				app.ShiftDown()
-			} else if ev.Key() == tcell.KeyUp {
-				app.ShiftUp()
-			} else if ev.Key() == tcell.KeyLeft {
-				// we change the path but that's all so we have to walk to it still
-				app.Path.ToParent()
-				app.Walk(app.Path)
-			} else if ev.Key() == tcell.KeyRight {
-				app.WalkToChild()
-			} else if ev.Key() == tcell.KeyRune {
-				if ev.Rune() == 'h' || ev.Rune() == 'H' {
-					// go to user home directory (if it was found)
-					app.Walk(app.Home)
-				} else if ev.Rune() == 'b' || ev.Rune() == 'B' {
-					// go to initial directory
-					app.Walk(app.InitDir)
-				}
-			}
-		case *tcell.EventError:
-			// can we access the actual tcell error? idk
-			log.Fatal("Panic! At The Unknown Input") // os.Exit(1) follows log.Fatal()
+		s.Show()                             // Update screen
+		event := s.PollEvent()               // Poll event
+		err := handleKeyEvent(event, s, app) // Handle event
+		if err != nil {                      // Gracefully quit
+			break renderloop
 		}
 		// draw after (potential) changes
 		app.Refresh(s)

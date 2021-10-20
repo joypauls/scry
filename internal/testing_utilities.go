@@ -1,4 +1,4 @@
-package testutils
+package misc
 
 import (
 	"testing"

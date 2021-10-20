@@ -39,7 +39,7 @@ jobs:
           COLOR=red
         elif (( $(echo "$total < 40" | bc -l) )); then
           COLOR=orange
-        elif (( $(echo "$total < 70" | bc -l) )); then
+        elif (( $(echo "$total < 60" | bc -l) )); then
           COLOR=yellow
         else
           COLOR=green

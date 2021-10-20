@@ -5,7 +5,8 @@ build:
 	go build -ldflags="-s -w -X main.version=$(TAG)" -o ./bin/scry-darwin-arm64
 
 run:
-	go run main.go
+	go build
+	./scry
 
 dev:
 	sh ./dev-setup.sh

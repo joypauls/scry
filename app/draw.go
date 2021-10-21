@@ -9,11 +9,19 @@ import (
 	"github.com/mattn/go-runewidth"
 )
 
+var vLineRune = '\u2502'
+
 // Uses tcell specific functionality to display a string in cells.
 func draw(s tcell.Screen, x, y int, style tcell.Style, text string) {
 	for _, r := range []rune(text) {
 		s.SetContent(x, y, r, nil, style)
 		x += runewidth.RuneWidth(r)
+	}
+}
+
+func drawDivider(s tcell.Screen, x, y1, y2 int, style tcell.Style) {
+	for i := y1; i <= y2; i++ {
+		draw(s, x, i, style, fmt.Sprintf(" %c ", vLineRune))
 	}
 }
 
@@ -34,13 +42,6 @@ func drawFrame(s tcell.Screen, app *App) {
 		header = "🔮 " + header
 	}
 	draw(s, 0, 0, defStyle, header)
-
-	if app.offset > 0 {
-		draw(s, 0, 1, defStyle, fmt.Sprintf("%c", arrowUp))
-	}
-	if app.maxIndex+app.offset+1 < app.Size() {
-		draw(s, 0, app.height-2, defStyle, fmt.Sprintf("%c", arrowDown))
-	}
 	// // bottom line
 	// coordStr := fmt.Sprintf("(%d)", app.index)
 	// draw(s, app.xEnd-len(coordStr)+1, app.height-1, defStyle, coordStr)
@@ -49,6 +50,14 @@ func drawFrame(s tcell.Screen, app *App) {
 
 // Actual file contents
 func drawWindow(s tcell.Screen, app *App) {
+	if !app.IsEmpty() {
+		if app.offset > 0 {
+			draw(s, 24, 1, defStyle, fmt.Sprintf("%c", arrowUp))
+		}
+		if app.maxIndex+app.offset+1 < app.Size() {
+			draw(s, 24, app.height-2, defStyle, fmt.Sprintf("%c", arrowDown))
+		}
+	}
 	limit := minInt(app.windowHeight, app.maxIndex)
 	for i := 0; i <= limit; i++ {
 		drawFile(
@@ -60,4 +69,5 @@ func drawWindow(s tcell.Screen, app *App) {
 			app.Path,
 		)
 	}
+	drawDivider(s, 52, 1, app.height-2, defStyle)
 }

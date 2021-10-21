@@ -12,7 +12,7 @@ import (
 
 // symbols for file
 const dirLabel = "📁"
-const fileLabel = "📄"
+const fileLabel = ""
 
 // minimum for maxLength is 5 (/... leading, / trailing), enforce?
 func formatPath(p *fst.Path, maxLen int) string {
@@ -32,11 +32,13 @@ func formatPath(p *fst.Path, maxLen int) string {
 }
 
 func formatFile(f fst.File, p *fst.Path) string {
-	label := fileLabel
-	if f.IsDir {
-		label = dirLabel
-	}
 	name := f.Name
+	format := "%-30.30s  %9s  %8s"
+	if f.IsDir {
+		name = dirLabel + " " + name
+		// very hacky way to accomodate double width rune
+		format = "%-29.29s  %9s  %8s"
+	}
 	// check for symlink
 	if f.IsSymLink {
 		// this should be done when the file is read
@@ -46,11 +48,16 @@ func formatFile(f fst.File, p *fst.Path) string {
 		}
 		name = name + fmt.Sprintf(" %c %s", arrowRight, target)
 	}
-	return fmt.Sprintf("%s %-4s  %#-4o  %-9s  %s ",
-		label,
-		fmt.Sprintf("%02d-%02d-%d", f.Time.Month(), f.Time.Day(), f.Time.Year()%100),
-		f.Perm,
-		f.Size.String(),
+	// return fmt.Sprintf("%s %-4s  %#-4o  %-9s  %s ",
+	// 	label,
+	// 	fmt.Sprintf("%02d-%02d-%d", f.Time.Month(), f.Time.Day(), f.Time.Year()%100),
+	// 	f.Perm,
+	// 	f.Size.String(),
+	// 	name,
+	// )
+	return fmt.Sprintf(format,
 		name,
+		f.Size.String(),
+		fmt.Sprintf("%2d/%02d/%d", f.Time.Month(), f.Time.Day(), f.Time.Year()%100),
 	)
 }

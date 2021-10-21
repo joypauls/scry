@@ -70,4 +70,11 @@ func drawWindow(s tcell.Screen, app *App) {
 		)
 	}
 	drawDivider(s, 52, 1, app.height-2, defStyle)
+
+	f := app.File(app.Index() + app.offset)
+	draw(s, 56, app.yStart, defStyle, fmt.Sprintf("%-20s", f.Name))
+	draw(s, 56, app.yStart+2, defStyle, fmt.Sprintf("Last Modified: %s", fmt.Sprintf("%2d/%02d/%d", f.Time.Month(), f.Time.Day(), f.Time.Year()%100)))
+	draw(s, 56, app.yStart+3, defStyle, fmt.Sprintf("Permissions: %#-4o", f.Perm))
+	draw(s, 56, app.yStart+4, defStyle, fmt.Sprintf("             %s", f.Perm))
+	draw(s, 56, app.yStart+5, defStyle, fmt.Sprintf("Size: %s", f.Size.String()))
 }

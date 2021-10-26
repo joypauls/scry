@@ -56,7 +56,7 @@ func render(c app.Config) {
 	if err := s.Init(); err != nil {
 		log.Fatalf("%+v", err)
 	}
-	s.SetStyle(defaultStyle)
+	// s.SetStyle(defaultStyle) // what was this for
 	s.Clear()
 
 	// initialize app object

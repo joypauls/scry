@@ -37,7 +37,7 @@ func (b BytesSI) String() string {
 	case b >= KB:
 		return fmt.Sprintf("%.1f KB", b/KB)
 	}
-	return fmt.Sprintf("%.0f  B", b) // num of bytes is an exact quantity
+	return fmt.Sprintf("%.0f B", b) // num of bytes is an exact quantity
 }
 
 // Should use custom enum to restrict supported file types

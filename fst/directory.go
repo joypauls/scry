@@ -16,7 +16,7 @@ func readDirectory(p *Path) ([]os.DirEntry, error) {
 	contents, err := os.ReadDir(p.String()) // DirEntry slice
 	if err != nil {
 		if os.IsPermission(err) {
-			return []os.DirEntry{}, errors.New("Error reading directory: Permission denied 🔒")
+			return []os.DirEntry{}, errors.New("Permission Denied 🔒")
 		}
 		// should handle this with more care
 		// we don't need to display the path because it is on the top status bar
@@ -52,12 +52,12 @@ type Directory struct {
 	err   error // where to store error if there's a problem processing the directory
 }
 
-func (d *Directory) File(i int) *File {
+func (d *Directory) File(i int) File {
 	if i < 0 || i >= d.size {
 		fmt.Println(i)
 		log.Fatal("Requested a file from index that doesn't exist")
 	}
-	return &d.files[i]
+	return d.files[i]
 }
 
 func (d *Directory) Files() []File {

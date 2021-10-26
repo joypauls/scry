@@ -16,7 +16,7 @@ func MakeLayout(w, h int) Layout {
 	padding := 2 // min for this is 2
 	f := Layout{}
 	f.width, f.height = w, h
-	f.xStart = 0
+	f.xStart = 1
 	f.xEnd = w - 1
 	f.yStart = 0 + padding
 	f.yEnd = h - 1 - padding

@@ -3,6 +3,7 @@ package app
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/joypauls/scry/fst"
@@ -41,11 +42,21 @@ func drawFrame(s tcell.Screen, app *App) {
 	if app.UseEmoji {
 		header = "🔮 " + header
 	}
-	draw(s, 0, 0, defStyle, header)
+	// user, err := user.Current()
+	// if err != nil {
+	// 	header = fmt.Sprintf(header, "?")
+	// } else {
+	// 	header = fmt.Sprintf(header, user.Username)
+	// }
+	fmtStr := "%-" + strconv.Itoa(app.width) + "s"
+	draw(s, 0, 0, hlStyle, fmt.Sprintf(fmtStr, header))
+	// draw(s, 0, 0, selStyle, fmt.Sprintf(fmtStr, "[esc] quit [h] home [b] initial"))
+
 	// // bottom line
 	// coordStr := fmt.Sprintf("(%d)", app.index)
 	// draw(s, app.xEnd-len(coordStr)+1, app.height-1, defStyle, coordStr)
-	draw(s, 0, app.height-1, defStyle, "[esc] quit [h] home [b] initial")
+	fmtStr = "%" + strconv.Itoa(app.width) + "s"
+	draw(s, 0, app.height-1, hlStyle, fmt.Sprintf(fmtStr, "[esc] quit [h] home [b] initial"))
 }
 
 // Actual file contents
@@ -65,16 +76,16 @@ func drawWindow(s tcell.Screen, app *App) {
 			app.xStart,
 			app.yStart+i,
 			i == app.index,
-			*app.File(i + app.offset),
+			app.File(i+app.offset),
 			app.Path,
 		)
 	}
-	drawDivider(s, 52, 1, app.height-2, defStyle)
+	drawDivider(s, 53, 1, app.height-2, defStyle)
 
 	f := app.File(app.Index() + app.offset)
-	draw(s, 56, app.yStart, defStyle, fmt.Sprintf("%-20s", f.Name))
-	draw(s, 56, app.yStart+2, defStyle, fmt.Sprintf("Last Modified: %s", fmt.Sprintf("%2d/%02d/%d", f.Time.Month(), f.Time.Day(), f.Time.Year()%100)))
-	draw(s, 56, app.yStart+3, defStyle, fmt.Sprintf("Permissions: %#-4o", f.Perm))
-	draw(s, 56, app.yStart+4, defStyle, fmt.Sprintf("             %s", f.Perm))
-	draw(s, 56, app.yStart+5, defStyle, fmt.Sprintf("Size: %s", f.Size.String()))
+	draw(s, 57, app.yStart, defStyle, fmt.Sprintf("%-20s", formatFileName(f)))
+	draw(s, 57, app.yStart+2, defStyle, fmt.Sprintf("Last Modified: %s", fmt.Sprintf("%2d/%02d/%d", f.Time.Month(), f.Time.Day(), f.Time.Year()%100)))
+	draw(s, 57, app.yStart+3, defStyle, fmt.Sprintf("Permissions: %#-4o", f.Perm))
+	draw(s, 57, app.yStart+4, defStyle, fmt.Sprintf("             %s", f.Perm))
+	draw(s, 57, app.yStart+5, defStyle, fmt.Sprintf("Size: %s", f.Size.String()))
 }

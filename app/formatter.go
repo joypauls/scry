@@ -31,14 +31,20 @@ func formatPath(p *fst.Path, maxLen int) string {
 	return fmt.Sprintf("/...%s%c", clipped, fp.Separator)
 }
 
+func formatFileName(f fst.File) string {
+	if f.IsDir {
+		return dirLabel + " " + f.Name
+	}
+	return f.Name
+}
+
 func formatFile(f fst.File, p *fst.Path) string {
-	name := f.Name
 	format := "%-30.30s  %9s  %8s"
 	if f.IsDir {
-		name = dirLabel + " " + name
 		// very hacky way to accomodate double width rune
 		format = "%-29.29s  %9s  %8s"
 	}
+	name := formatFileName(f)
 	// check for symlink
 	if f.IsSymLink {
 		// this should be done when the file is read

@@ -39,10 +39,10 @@ func formatFileName(f fst.File) string {
 }
 
 func formatFile(f fst.File, p *fst.Path) string {
-	format := "%-30.30s  %9s  %8s"
+	format := " %-30.30s  %9s  %8s  "
 	if f.IsDir {
 		// very hacky way to accomodate double width rune
-		format = "%-29.29s  %9s  %8s"
+		format = " %-29.29s  %9s  %8s  "
 	}
 	name := formatFileName(f)
 	// check for symlink

@@ -37,9 +37,9 @@ func TestDraw(t *testing.T) {
 		style  tcell.Style
 		text   string
 	}{
-		{s, 0, 0, defStyle, "some test text "},
-		{s, 10, 20, defStyle, "/test/path/display/"},
-		{s, 0, 30, defStyle, "📁 file 📁 stuff 📁 emoji 📁"},
+		{s, 0, 0, theme.Default, "some test text "},
+		{s, 10, 20, theme.Default, "/test/path/display/"},
+		{s, 0, 30, theme.Default, "📁 file 📁 stuff 📁 emoji 📁"},
 	}
 
 	// iterate over test tables

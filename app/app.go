@@ -19,9 +19,7 @@ import (
 
 // this global config sucks let's get rid of it please
 // should just handle all this in config setup?
-var defStyle = tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorReset)
-var selStyle = tcell.StyleDefault.Foreground(tcell.ColorSalmon).Background(tcell.ColorBlack)
-var hlStyle = tcell.StyleDefault.Foreground(tcell.ColorWhite).Background(tcell.ColorIndigo)
+var theme = themes["fey"]
 
 // var hlStyle = tcell.StyleDefault.Foreground(tcell.ColorWhite).Background(tcell.ColorBlueViolet)
 
@@ -125,9 +123,9 @@ func (app *App) WalkToChild() {
 func (app *App) Draw(s tcell.Screen) {
 	drawFrame(s, app)
 	if app.IsProblem() {
-		draw(s, app.xStart, app.yStart, defStyle, app.Error())
+		draw(s, app.xStart, app.yStart, theme.Default, app.Error())
 	} else if app.IsEmpty() {
-		draw(s, app.xStart, app.yStart, defStyle, "<EMPTY>")
+		draw(s, app.xStart, app.yStart, theme.Default, "<EMPTY>")
 	} else {
 		drawWindow(s, app)
 	}

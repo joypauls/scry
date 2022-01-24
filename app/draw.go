@@ -52,14 +52,17 @@ func drawFrame(s tcell.Screen, app *App) {
 	draw(s, 0, 0, theme.Highlight, fmt.Sprintf(fmtStr, header))
 	// draw(s, 0, 0, selStyle, fmt.Sprintf(fmtStr, "[esc] quit [h] home [b] initial"))
 
-	fmtStr = "%" + strconv.Itoa(app.width-maxHeaderLen) + "s"
-	draw(s, maxHeaderLen, 0, theme.Highlight, fmt.Sprintf(fmtStr, "git branch"))
+	branch, _ := getGitBranchName(app.Path)
+	if branch != "" {
+		fmtStr = "%" + strconv.Itoa(app.width-maxHeaderLen) + "s"
+		draw(s, maxHeaderLen, 0, theme.Highlight, fmt.Sprintf(fmtStr, "git:("+branch+")"))
+	}
 
 	// // bottom line
 	// coordStr := fmt.Sprintf("(%d)", app.index)
 	// draw(s, app.xEnd-len(coordStr)+1, app.height-1, defStyle, coordStr)
 	fmtStr = "%" + strconv.Itoa(app.width) + "s"
-	draw(s, 0, app.height-1, theme.Highlight, fmt.Sprintf(fmtStr, "[esc]:quit  [h]:home  [b]:initial"))
+	draw(s, 0, app.height-1, theme.Highlight, fmt.Sprintf(fmtStr, "[esc]quit  [h]home  [b]initial"))
 }
 
 // Actual file contents

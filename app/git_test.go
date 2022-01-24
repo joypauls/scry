@@ -16,14 +16,31 @@ func TestGetGitPath(t *testing.T) {
 		path     string
 		expected string // after formatting
 	}{
-		{".", "/Users/joypauls/Documents/code/file-scry/.git\n"},
-		{"/Users/joypauls/Documents/code/file-scry", "/Users/joypauls/Documents/code/file-scry/.git\n"},
-		// {"/test/more/stuff", "/test/more/stuff/"},
+		{".", "/Users/joypauls/Documents/code/file-scry/.git"},
+		{"/Users/joypauls/Documents/code/file-scry", "/Users/joypauls/Documents/code/file-scry/.git"},
 	}
 
 	// iterate over test tables
 	for _, table := range tables {
 		result, _ := getGitPath(fst.NewPath(table.path))
+		if result.String() != table.expected {
+			t.Errorf("Result: %s, Expected: %s", result, table.expected)
+		}
+	}
+}
+
+func TestGetGitBranch(t *testing.T) {
+	// table of test cases
+	tables := []struct {
+		path     string
+		expected string // after formatting
+	}{
+		{".", "main"}, // this is dumb and will break lol
+	}
+
+	// iterate over test tables
+	for _, table := range tables {
+		result, _ := getGitBranchName(fst.NewPath(table.path))
 		if result != table.expected {
 			t.Errorf("Result: %s, Expected: %s", result, table.expected)
 		}

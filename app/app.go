@@ -19,7 +19,7 @@ import (
 
 // this global config sucks let's get rid of it please
 // should just handle all this in config setup?
-var theme = themes["l33t"]
+var theme = themes["fey"]
 
 // var hlStyle = tcell.StyleDefault.Foreground(tcell.ColorWhite).Background(tcell.ColorBlueViolet)
 

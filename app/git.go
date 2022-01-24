@@ -26,10 +26,6 @@ func getGitPath(p *fst.Path) (*fst.Path, error) {
 }
 
 func getGitBranchName(p *fst.Path) (string, error) {
-	// gitPath, err := getGitPath(p)
-	// if err != nil {
-	// 	return "", err
-	// }
 	cmd := exec.Command("git", "branch", "--show-current")
 	cmd.Dir = p.String()
 	out, err := cmd.Output()

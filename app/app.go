@@ -19,7 +19,7 @@ import (
 
 // this global config sucks let's get rid of it please
 // should just handle all this in config setup?
-var theme = themes["fey"]
+var theme = themes["l33t"]
 
 // var hlStyle = tcell.StyleDefault.Foreground(tcell.ColorWhite).Background(tcell.ColorBlueViolet)
 
@@ -40,8 +40,8 @@ func init() {
 
 // Main object managing the app functionality and display.
 type App struct {
-	Layout
 	*fst.Directory
+	Layout
 	Config
 	Path *fst.Path
 	// these below are critical to protect

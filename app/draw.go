@@ -36,8 +36,8 @@ func drawFile(s tcell.Screen, x, y int, selected bool, f fst.File, p *fst.Path) 
 
 // draw stuff that is not directory contents
 func drawFrame(s tcell.Screen, app *App) {
-	// top bar content
 	maxHeaderLen := (7 * app.width) / 10 // 70% of width
+	// top bar content
 	header := formatPath(app.Path, maxHeaderLen)
 	if app.UseEmoji {
 		header = "🔮 " + header
@@ -52,11 +52,14 @@ func drawFrame(s tcell.Screen, app *App) {
 	draw(s, 0, 0, theme.Highlight, fmt.Sprintf(fmtStr, header))
 	// draw(s, 0, 0, selStyle, fmt.Sprintf(fmtStr, "[esc] quit [h] home [b] initial"))
 
+	fmtStr = "%" + strconv.Itoa(app.width-maxHeaderLen) + "s"
+	draw(s, maxHeaderLen, 0, theme.Highlight, fmt.Sprintf(fmtStr, "git branch"))
+
 	// // bottom line
 	// coordStr := fmt.Sprintf("(%d)", app.index)
 	// draw(s, app.xEnd-len(coordStr)+1, app.height-1, defStyle, coordStr)
 	fmtStr = "%" + strconv.Itoa(app.width) + "s"
-	draw(s, 0, app.height-1, theme.Highlight, fmt.Sprintf(fmtStr, "[esc] quit [h] home [b] initial"))
+	draw(s, 0, app.height-1, theme.Highlight, fmt.Sprintf(fmtStr, "[esc]:quit  [h]:home  [b]:initial"))
 }
 
 // Actual file contents
@@ -84,7 +87,8 @@ func drawWindow(s tcell.Screen, app *App) {
 	drawDivider(s, 54, 1, app.height-2, theme.Default)
 
 	f := app.File(app.Index() + app.offset)
-	draw(s, 57, app.yStart, theme.Default, fmt.Sprintf("%-20s", formatFileName(f)))
+	// draw(s, 57, app.yStart, theme.Default, fmt.Sprintf("%-20s", formatFileName(f)))
+	draw(s, 57, app.yStart, theme.DefaultEmph, fmt.Sprintf("%-20s", formatFileName(f)))
 	draw(s, 57, app.yStart+2, theme.Default, fmt.Sprintf("Size           %s", f.Size.String()))
 	draw(s, 57, app.yStart+3, theme.Default, fmt.Sprintf("Last Modified  %s", fmt.Sprintf("%2d/%02d/%d", f.Time.Month(), f.Time.Day(), f.Time.Year()%100)))
 	draw(s, 57, app.yStart+4, theme.Default, fmt.Sprintf("Permissions    %#-4o", f.Perm))

@@ -9,17 +9,21 @@ type Layout struct {
 	yStart       int
 	yEnd         int
 	windowHeight int // equals the # of available lines for dir contents
+	middle       int
+	innerPadding int
 }
 
 // constructor for Layout
 func MakeLayout(w, h int) Layout {
-	padding := 2 // min for this is 2
-	f := Layout{}
-	f.width, f.height = w, h
-	f.xStart = 1
-	f.xEnd = w - 1
-	f.yStart = 0 + padding
-	f.yEnd = h - 1 - padding
-	f.windowHeight = f.yEnd - f.yStart + 1
-	return f
+	outerPadding := 2 // min for this is 2
+	l := Layout{}
+	l.width, l.height = w, h
+	l.xStart = 0
+	l.xEnd = w - 1
+	l.yStart = 0 + outerPadding
+	l.yEnd = h - 1 - outerPadding
+	l.windowHeight = l.yEnd - l.yStart + 1
+	l.middle = w / 2
+	l.innerPadding = 3 // min for this is 2
+	return l
 }

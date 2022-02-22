@@ -11,7 +11,7 @@ import (
 )
 
 // symbols for file
-const dirLabel = "📁"
+const dirLabel = "🗂" // "📁"
 const fileLabel = ""
 
 // minimum for maxLength is 5 (/... leading, / trailing), enforce?
@@ -38,11 +38,16 @@ func formatFileName(f fst.File) string {
 	return f.Name
 }
 
-func formatFile(f fst.File, p *fst.Path) string {
-	format := " %-30.30s  %9s  %8s  "
+// this method needs some tlc
+func formatFile(f fst.File, p *fst.Path, w int) string {
+	// shouldn't be hardcoded but don't know a great way yet
+	// 1 + nameWidth + statsWidth = w
+	statsWidth := 24
+	nameWidth := w - statsWidth
+	format := fmt.Sprintf(" %%-%d.%ds  %%9s  %%8s  ", nameWidth, nameWidth)
 	if f.IsDir {
 		// very hacky way to accomodate double width rune
-		format = " %-29.29s  %9s  %8s  "
+		format = fmt.Sprintf(" %%-%d.%ds  %%9s  %%8s  ", nameWidth, nameWidth)
 	}
 	name := formatFileName(f)
 	// check for symlink
@@ -54,13 +59,7 @@ func formatFile(f fst.File, p *fst.Path) string {
 		}
 		name = name + fmt.Sprintf(" %c %s", arrowRight, target)
 	}
-	// return fmt.Sprintf("%s %-4s  %#-4o  %-9s  %s ",
-	// 	label,
-	// 	fmt.Sprintf("%02d-%02d-%d", f.Time.Month(), f.Time.Day(), f.Time.Year()%100),
-	// 	f.Perm,
-	// 	f.Size.String(),
-	// 	name,
-	// )
+
 	return fmt.Sprintf(format,
 		name,
 		f.Size.String(),

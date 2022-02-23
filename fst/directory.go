@@ -92,10 +92,29 @@ func (d *Directory) Sort(method SortMethod) {
 		sort.Slice(d.files, func(i, j int) bool {
 			return strings.ToLower(d.files[i].Name) > strings.ToLower(d.files[j].Name)
 		})
-	// sort by whether file is a directory
+	// sort by whether file is a directory and secondarily by name
+	case DirectoryAsc:
+		sort.Slice(d.files, func(i, j int) bool {
+			if d.files[i].IsDir && d.files[j].IsDir {
+				return strings.ToLower(d.files[i].Name) > strings.ToLower(d.files[j].Name)
+			} else if !d.files[i].IsDir && !d.files[j].IsDir {
+				return strings.ToLower(d.files[i].Name) > strings.ToLower(d.files[j].Name)
+			} else if d.files[i].IsDir {
+				if !d.files[j].IsDir {
+					return false
+				}
+			} else if d.files[j].IsDir {
+				return true
+			}
+			return false
+		})
 	case DirectoryDesc:
 		sort.Slice(d.files, func(i, j int) bool {
-			if d.files[i].IsDir {
+			if d.files[i].IsDir && d.files[j].IsDir {
+				return strings.ToLower(d.files[i].Name) < strings.ToLower(d.files[j].Name)
+			} else if !d.files[i].IsDir && !d.files[j].IsDir {
+				return strings.ToLower(d.files[i].Name) < strings.ToLower(d.files[j].Name)
+			} else if d.files[i].IsDir {
 				if !d.files[j].IsDir {
 					return true
 				}
@@ -146,6 +165,6 @@ func NewDirectoryFromSlice(dir []os.DirEntry, showHidden bool) *Directory {
 	d := new(Directory)
 	d.files = processDirectory(dir, showHidden)
 	d.size = len(d.files)
-	d.Sort(NameDesc)
+	d.Sort(NameAsc)
 	return d
 }

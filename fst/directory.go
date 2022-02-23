@@ -12,6 +12,15 @@ import (
 	"strings"
 )
 
+type SortMethod int
+
+const (
+	NameAsc SortMethod = iota
+	NameDesc
+	DirectoryAsc
+	DirectoryDesc
+)
+
 func readDirectory(p *Path) ([]os.DirEntry, error) {
 	contents, err := os.ReadDir(p.String()) // DirEntry slice
 	if err != nil {
@@ -64,11 +73,38 @@ func (d *Directory) Files() []File {
 	return d.files
 }
 
-func (d *Directory) SortNameDesc() {
-	sort.Slice(d.files, func(i, j int) bool {
-		// this feels inefficient
-		return strings.ToLower(d.files[i].Name) < strings.ToLower(d.files[j].Name)
-	})
+// func (d *Directory) SortNameDesc() {
+// 	sort.Slice(d.files, func(i, j int) bool {
+// 		// this feels inefficient
+// 		return strings.ToLower(d.files[i].Name) < strings.ToLower(d.files[j].Name)
+// 	})
+// }
+
+// Sorts slice of Files in place.
+func (d *Directory) Sort(method SortMethod) {
+	switch method {
+	// sort by file name
+	case NameAsc:
+		sort.Slice(d.files, func(i, j int) bool {
+			return strings.ToLower(d.files[i].Name) < strings.ToLower(d.files[j].Name)
+		})
+	case NameDesc:
+		sort.Slice(d.files, func(i, j int) bool {
+			return strings.ToLower(d.files[i].Name) > strings.ToLower(d.files[j].Name)
+		})
+	// sort by whether file is a directory
+	case DirectoryDesc:
+		sort.Slice(d.files, func(i, j int) bool {
+			if d.files[i].IsDir {
+				if !d.files[j].IsDir {
+					return true
+				}
+			} else if d.files[j].IsDir {
+				return false
+			}
+			return true
+		})
+	}
 }
 
 func (d *Directory) Size() int {
@@ -93,7 +129,7 @@ func (d *Directory) Read(p *Path, showHidden bool) {
 		d.files = []File{}
 	} else {
 		d.files = processDirectory(dir, showHidden)
-		d.SortNameDesc() // just sort for default for now
+		d.Sort(DirectoryDesc) // just sort for default for now
 	}
 	d.err = err
 	d.size = len(d.files)
@@ -105,11 +141,11 @@ func NewDirectory(p *Path, showHidden bool) *Directory {
 	return d
 }
 
-// This is mostly for tests.
+// This is for tests.
 func NewDirectoryFromSlice(dir []os.DirEntry, showHidden bool) *Directory {
 	d := new(Directory)
 	d.files = processDirectory(dir, showHidden)
 	d.size = len(d.files)
-	d.SortNameDesc()
+	d.Sort(NameDesc)
 	return d
 }

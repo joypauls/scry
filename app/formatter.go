@@ -11,7 +11,7 @@ import (
 )
 
 // symbols for file
-const dirLabel = "🗂" // "📁"
+const dirLabel = "🗂 " // "📁 "
 const fileLabel = ""
 
 // minimum for maxLength is 5 (/... leading, / trailing), enforce?

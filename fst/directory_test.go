@@ -123,7 +123,7 @@ func TestDirectorySorting(t *testing.T) {
 	d := new(Directory)
 	d.files = processDirectory(dirRaw, false)
 	d.size = len(d.files)
-	d.SortNameDesc()
+	d.Sort(NameDesc)
 
 	if res, exp := d.File(0).Name, "hello.txt"; res != exp {
 		t.Errorf("Result: %s, Expected: %s", res, exp)

@@ -108,10 +108,10 @@ func drawWindow(s tcell.Screen, app *App) {
 	// handle case when we need overflow indicators
 	if !app.IsEmpty() {
 		if app.offset > 0 {
-			draw(s, 24, 1, theme.Default, fmt.Sprintf("%c", arrowUp))
+			draw(s, (app.middle-app.innerPadding)/2, 1, theme.Default, fmt.Sprintf("%c", arrowUp))
 		}
 		if app.maxIndex+app.offset+1 < app.Size() {
-			draw(s, 24, app.height-2, theme.Default, fmt.Sprintf("%c", arrowDown))
+			draw(s, (app.middle-app.innerPadding)/2, app.height-2, theme.Default, fmt.Sprintf("%c", arrowDown))
 		}
 	}
 	// draw main content

@@ -62,20 +62,21 @@ func TestDrawFile(t *testing.T) {
 	// table of test cases
 	tables := []struct {
 		screen   tcell.Screen
-		x        int
+		x1       int
+		x2       int
 		y        int
 		selected bool
 		file     fst.File
 		path     *fst.Path
 	}{
-		{s, 0, 0, false, f, p},
-		{s, 10, 20, true, f, p},
+		{s, 0, 30, 0, false, f, p},
+		{s, 10, 30, 20, true, f, p},
 	}
 
 	// iterate over test tables
 	for _, table := range tables {
 		// doesn't throw an error so not sure how else to test this
-		drawFile(table.screen, table.x, table.y, table.selected, table.file, table.path)
+		drawFile(table.screen, table.x1, table.x2, table.y, table.selected, table.file, table.path)
 		s.Show()
 	}
 }

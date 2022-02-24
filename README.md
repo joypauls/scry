@@ -18,4 +18,13 @@ This project makes heavy use of the wonderful [tcell](https://github.com/gdamore
 
 Check out the documentation [website](joypauls.github.io/scry/) for the best experience, thank you!
 
+## Dev Stuff
+
+### Release a New Version
+
+1. Create new tag with git like so: `git tag -a v<NUMBER> -m "<MESSAGE>"`
+2. Push the new tag `git push --tags`
+
+
+
 

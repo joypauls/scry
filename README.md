@@ -13,10 +13,15 @@ A terminal-based file system explorer written in Go intuitive and snappy enough 
 
 This project makes heavy use of the wonderful [tcell](https://github.com/gdamore/tcell) Go package.
 
-
 ## Quick Start
 
 Check out the documentation [website](joypauls.github.io/scry/) for the best experience, thank you!
+
+## Configuration
+
+Directory: `~/.scry/`
+Config File: `~/.scry/config.yaml`
+Favorites Store: `~/.scry/favorites.json`
 
 ## Dev Stuff
 
@@ -24,7 +29,3 @@ Check out the documentation [website](joypauls.github.io/scry/) for the best exp
 
 1. Create new tag with git like so: `git tag -a v<NUMBER> -m "<MESSAGE>"`
 2. Push the new tag `git push --tags`
-
-
-
-

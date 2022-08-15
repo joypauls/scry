@@ -2,4 +2,8 @@
 
 # ln -s app/app.go link
 # mkdir -p /etc/scry/
-cp .scry.yaml ~/
+
+mkdir -p ~/.scry
+cp config.yaml ~/.scry/config.yaml
+touch ~/.scry/favorites.json
+

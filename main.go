@@ -16,7 +16,7 @@ import (
 var version = "v0.0.0"
 
 // Location to check for config override file
-const configFile = ".config/scry/config.yaml"
+const configFile = ".scry/config.yaml"
 
 const titleText = "Scry CLI tool"
 const helpText = `Usage:

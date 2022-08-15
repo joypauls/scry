@@ -8,7 +8,7 @@ run:
 	go build
 	./scry
 
-dev:
+dev-setup:
 	sh ./dev-setup.sh
 
 clean:

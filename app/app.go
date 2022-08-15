@@ -71,11 +71,20 @@ func (app *App) Index() int {
 	return app.index
 }
 
-func (app *App) ShiftDown() {
+func (app *App) Top() {
+	app.index = 0
+	app.offset = 0
+}
+
+func (app *App) Bottom() {
+	app.index = app.maxIndex
+	app.offset = (app.Size() - 1) - app.maxIndex
+}
+
+func (app *App) Down() {
 	if app.index == app.maxIndex {
 		if app.maxIndex+app.offset == app.Size()-1 {
-			app.index = 0
-			app.offset = 0
+			app.Top()
 		} else if app.maxIndex+app.offset < app.Size()-1 {
 			// keep index the same! (at bottom)
 			app.offset++
@@ -85,11 +94,10 @@ func (app *App) ShiftDown() {
 	}
 }
 
-func (app *App) ShiftUp() {
+func (app *App) Up() {
 	if app.index == 0 {
 		if app.offset == 0 {
-			app.index = app.maxIndex
-			app.offset = (app.Size() - 1) - app.maxIndex
+			app.Bottom()
 		} else if app.offset > 0 {
 			// keep index the same (at top)
 			app.offset--

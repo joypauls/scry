@@ -86,19 +86,19 @@ func drawSelectionDetails(s tcell.Screen, x, y int, f fst.File) {
 		formatFileName(f),
 	))
 	draw(s, x, y+2, theme.Default, fmt.Sprintf(
-		"Size           %s",
+		"Size          : %s",
 		f.Size.String(),
 	))
 	draw(s, x, y+3, theme.Default, fmt.Sprintf(
-		"Last Modified  %s",
+		"Last Modified : %s",
 		fmt.Sprintf("%2d/%02d/%d", f.Time.Month(), f.Time.Day(), f.Time.Year()%100),
 	))
 	draw(s, x, y+4, theme.Default, fmt.Sprintf(
-		"Permissions    %#-4o",
+		"Permissions   : %#-4o",
 		f.Perm,
 	))
 	draw(s, x, y+5, theme.Default, fmt.Sprintf(
-		"               %s",
+		"                %s",
 		f.Perm,
 	))
 }

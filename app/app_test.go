@@ -89,13 +89,13 @@ func TestAppShifting(t *testing.T) {
 
 	// normal scrolling
 	app.addIndex(1)
-	app.ShiftUp()
+	app.Up()
 	if res, exp := app.Index(), 0; res != exp {
 		t.Errorf("Result: %d, Expected: %d", res, exp)
 	}
 
 	// loop around to last element
-	app.ShiftUp()
+	app.Up()
 	if res, exp := app.Index(), 2; res != exp {
 		t.Errorf("Result: %d, Expected: %d", res, exp)
 	}
@@ -104,7 +104,7 @@ func TestAppShifting(t *testing.T) {
 	app.resetIndex()
 	app.maxIndex = 1
 	app.offset = 1
-	app.ShiftUp()
+	app.Up()
 	if res, exp := app.offset, 0; res != exp {
 		t.Errorf("Result: %d, Expected: %d", res, exp)
 	}
@@ -113,13 +113,13 @@ func TestAppShifting(t *testing.T) {
 
 	// normal scrolling
 	app.addIndex(1)
-	app.ShiftDown()
+	app.Down()
 	if res, exp := app.Index(), 2; res != exp {
 		t.Errorf("Result: %d, Expected: %d", res, exp)
 	}
 
 	// loop around to first element
-	app.ShiftDown()
+	app.Down()
 	if res, exp := app.Index(), 0; res != exp {
 		t.Errorf("Result: %d, Expected: %d", res, exp)
 	}
@@ -128,7 +128,7 @@ func TestAppShifting(t *testing.T) {
 	app.resetIndex()
 	app.addIndex(1)
 	app.maxIndex = 1
-	app.ShiftDown()
+	app.Down()
 	if res, exp := app.offset, 1; res != exp {
 		t.Errorf("Result: %d, Expected: %d", res, exp)
 	}

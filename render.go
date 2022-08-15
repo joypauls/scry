@@ -23,9 +23,9 @@ func handleKeyEvent(e tcell.Event, s tcell.Screen, app *app.App) error {
 			quit()
 			return errors.New("User closed the app. Nothing to do.")
 		} else if e.Key() == tcell.KeyDown {
-			app.ShiftDown()
+			app.Down()
 		} else if e.Key() == tcell.KeyUp {
-			app.ShiftUp()
+			app.Up()
 		} else if e.Key() == tcell.KeyLeft {
 			// we change the path but that's all so we have to walk to it still
 			app.Path.ToParent()
@@ -39,6 +39,10 @@ func handleKeyEvent(e tcell.Event, s tcell.Screen, app *app.App) error {
 			} else if e.Rune() == 'b' || e.Rune() == 'B' {
 				// go to initial directory
 				app.Walk(app.InitDir)
+			} else if e.Rune() == 'w' {
+				app.Top()
+			} else if e.Rune() == 's' {
+				app.Bottom()
 			}
 		}
 	case *tcell.EventError:

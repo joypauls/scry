@@ -16,6 +16,12 @@ var themes = map[string]Theme{
 		Selected:    tcell.StyleDefault.Foreground(tcell.ColorLightPink.TrueColor()).Background(tcell.ColorDarkSlateBlue.TrueColor()),
 		Highlight:   tcell.StyleDefault.Foreground(tcell.ColorWhite).Background(tcell.ColorDarkSlateBlue.TrueColor()),
 	},
+	"tea": {
+		Default:     tcell.StyleDefault.Foreground(tcell.ColorReset).Background(tcell.ColorReset),
+		DefaultEmph: tcell.StyleDefault.Foreground(tcell.ColorPink.TrueColor()).Background(tcell.ColorReset),
+		Selected:    tcell.StyleDefault.Foreground(tcell.ColorBlack.TrueColor()).Background(tcell.Color115.TrueColor()),
+		Highlight:   tcell.StyleDefault.Foreground(tcell.ColorBlack).Background(tcell.ColorPink.TrueColor()),
+	},
 	"l33t": {
 		Default:     tcell.StyleDefault.Foreground(tcell.ColorReset).Background(tcell.ColorReset),
 		DefaultEmph: tcell.StyleDefault.Foreground(tcell.ColorLawnGreen.TrueColor()).Background(tcell.ColorReset),

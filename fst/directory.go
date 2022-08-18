@@ -160,7 +160,7 @@ func NewDirectory(p *Path, showHidden bool) *Directory {
 	return d
 }
 
-// This is for tests.
+// This is for tests
 func NewDirectoryFromSlice(dir []os.DirEntry, showHidden bool) *Directory {
 	d := new(Directory)
 	d.files = processDirectory(dir, showHidden)

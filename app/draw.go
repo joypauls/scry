@@ -10,6 +10,7 @@ import (
 	"github.com/mattn/go-runewidth"
 )
 
+// ?
 var vLineRune = '\u2502'
 
 // Uses tcell specific functionality to display a string in cells.

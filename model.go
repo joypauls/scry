@@ -6,6 +6,7 @@ import (
 	"github.com/joypauls/scry/fst"
 )
 
+// Model: state of the program
 type model struct {
 	list      list.Model
 	directory *fst.Directory
@@ -16,7 +17,7 @@ func (m model) Init() tea.Cmd {
 	return tea.EnterAltScreen
 }
 
-// Recursive updates
+// Update: modifying model based on input
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// Switch for key press events
 	switch msg := msg.(type) {
@@ -35,6 +36,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
+// View: logic to display model
 func (m model) View() string {
 	return docStyle.Render(m.list.View())
 }
@@ -49,11 +51,12 @@ func newModel() model {
 	// elements need to implement Item interface here
 	items := make([]list.Item, numItems)
 	for i := 0; i < numItems; i++ {
-		items[i] = MakeFileItem(d.File(i))
+		items[i] = MakeItem(d.File(i))
 	}
 
 	// Create and style list
-	delegate := list.NewDefaultDelegate()
+	delegate := NewFileDelegate()
+	// delegate := list.NewDefaultDelegate()
 	fileList := list.New(items, delegate, 0, 0)
 	fileList.Title = "Files"
 	fileList.Styles.Title = titleStyle

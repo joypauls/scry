@@ -3,16 +3,18 @@ package main
 import "github.com/joypauls/scry/fst"
 
 // Implementing Item interface from bubbles
-type fileItem struct {
+type item struct {
 	title, size string
 }
 
-func (i fileItem) Title() string       { return i.title }
-func (i fileItem) Description() string { return i.size }
-func (i fileItem) FilterValue() string { return i.title }
+// All these accessors are defined by default delegate
+// https://pkg.go.dev/github.com/charmbracelet/bubbles@v0.13.0/list#NewDefaultDelegate
+func (i item) Title() string       { return i.title }
+func (i item) Description() string { return i.size }
+func (i item) FilterValue() string { return i.title }
 
-func MakeFileItem(f fst.File) fileItem {
-	var i fileItem
+func MakeItem(f fst.File) item {
+	var i item
 	i.title = f.Name
 	i.size = f.Size.String()
 

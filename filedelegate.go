@@ -140,8 +140,14 @@ func (d FileDelegate) Render(w io.Writer, m list.Model, index int, item list.Ite
 
 	// Type check
 	if i, ok := item.(FileItem); ok {
+		// Set up strings to be styled
 		name = formatFileName(i.Name(), isDir)
+		name = fmt.Sprintf("%-30.30s", name)
+
 		size = i.Size().String()
+		size = fmt.Sprintf("%9s", size)
+
+		// Needed flags
 		isDir = i.IsDir()
 		// isSymLink = i.IsSymLink()
 		// symLinkTarget = i.SymLinkTarget()
@@ -209,7 +215,7 @@ func (d FileDelegate) Render(w io.Writer, m list.Model, index int, item list.Ite
 		size = s.NormalSize.Render(size)
 	}
 
-	fmt.Fprintf(w, "%s %s", name, size)
+	fmt.Fprintf(w, "%s %s", fmt.Sprintf("%-20s", name), size)
 	// fmt.Printf(formatFile(name, size, isDir, isSymLink, symLinkTarget, width))
 }
 

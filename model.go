@@ -57,6 +57,7 @@ func newModel() model {
 	// Create and style list
 	fd := NewFileDelegate()
 	files := list.New(listItems, fd, 0, 0)
+
 	files.Title = formatHeader(p, 50)
 	// files.Title = "Files"
 	files.Styles.Title = titleStyle

@@ -44,7 +44,7 @@ type App struct {
 	Layout
 	Config
 	Path *fst.Path
-	// these below are critical to protect
+	// these below are critical to keep protected
 	index    int // 0 <= index < maxIndex
 	offset   int // start of window
 	maxIndex int

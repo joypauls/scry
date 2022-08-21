@@ -7,20 +7,24 @@ const (
 	ellipsis = "…"
 )
 
+var docStyle = lipgloss.NewStyle().Margin(0, 1)
+var titleStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#FFFDF5")).Background(lipgloss.Color("#4621AD")).Padding(0, 1)
+var statusMessageStyle = lipgloss.NewStyle().Foreground(lipgloss.AdaptiveColor{Light: "#04B575", Dark: "#04B575"}).Render
+
 // DefaultItemStyles defines styling for a default list item.
 // See DefaultItemView for when these come into play.
 type FileStyles struct {
 	// The Normal state.
-	NormalTitle lipgloss.Style
-	NormalDesc  lipgloss.Style
+	NormalName lipgloss.Style
+	NormalSize lipgloss.Style
 
 	// The selected item state.
-	SelectedTitle lipgloss.Style
-	SelectedDesc  lipgloss.Style
+	SelectedName lipgloss.Style
+	SelectedSize lipgloss.Style
 
 	// The dimmed state, for when the filter input is initially activated.
-	DimmedTitle lipgloss.Style
-	DimmedDesc  lipgloss.Style
+	DimmedName lipgloss.Style
+	DimmedSize lipgloss.Style
 
 	// Charcters matching the current filter, if any.
 	FilterMatch lipgloss.Style
@@ -29,27 +33,31 @@ type FileStyles struct {
 // NewDefaultItemStyles returns style definitions for a default item. See
 // DefaultItemView for when these come into play.
 func NewFileStyles() (s FileStyles) {
-	s.NormalTitle = lipgloss.NewStyle().
+	s.NormalName = lipgloss.NewStyle().
 		Foreground(lipgloss.AdaptiveColor{Light: "#1a1a1a", Dark: "#dddddd"}).
 		Padding(0, 0, 0, 2)
 
-	s.NormalDesc = s.NormalTitle.Copy().
-		Foreground(lipgloss.AdaptiveColor{Light: "#A49FA5", Dark: "#777777"})
+	s.NormalSize = s.NormalName.Copy().
+		Foreground(lipgloss.AdaptiveColor{Light: "#A49FA5", Dark: "#777777"}).
+		Align(lipgloss.Right)
 
-	s.SelectedTitle = lipgloss.NewStyle().
+	s.SelectedName = lipgloss.NewStyle().
 		Border(lipgloss.NormalBorder(), false, false, false, true).
 		BorderForeground(lipgloss.AdaptiveColor{Light: "#F793FF", Dark: "#AD58B4"}).
 		Foreground(lipgloss.AdaptiveColor{Light: "#EE6FF8", Dark: "#EE6FF8"}).
 		Padding(0, 0, 0, 1)
 
-	s.SelectedDesc = s.SelectedTitle.Copy().
+	s.SelectedSize = lipgloss.NewStyle().
+		BorderForeground(lipgloss.AdaptiveColor{Light: "#F793FF", Dark: "#AD58B4"}).
+		Foreground(lipgloss.AdaptiveColor{Light: "#EE6FF8", Dark: "#EE6FF8"}).
+		Padding(0, 0, 0, 2).
 		Foreground(lipgloss.AdaptiveColor{Light: "#F793FF", Dark: "#AD58B4"})
 
-	s.DimmedTitle = lipgloss.NewStyle().
+	s.DimmedName = lipgloss.NewStyle().
 		Foreground(lipgloss.AdaptiveColor{Light: "#A49FA5", Dark: "#777777"}).
-		Padding(0, 0, 0, 2)
+		Padding(0, 0, 0, 1)
 
-	s.DimmedDesc = s.DimmedTitle.Copy().
+	s.DimmedSize = s.DimmedName.Copy().
 		Foreground(lipgloss.AdaptiveColor{Light: "#C2B8C2", Dark: "#4D4D4D"})
 
 	s.FilterMatch = lipgloss.NewStyle().Underline(true)

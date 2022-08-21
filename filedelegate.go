@@ -12,7 +12,7 @@ import (
 	"github.com/muesli/reflow/truncate"
 )
 
-// Need to implement ItemDelegate
+// Need to implement ItemDelegate interface
 // https://pkg.go.dev/github.com/charmbracelet/bubbles@v0.13.0/list#ItemDelegate
 //
 // --------------------------------------------------------
@@ -49,16 +49,16 @@ func NewFileDelegate() FileDelegate {
 		ShowDescription: true,
 		Styles:          NewFileStyles(),
 		height:          1,
-		spacing:         1,
+		spacing:         0,
 	}
 
 	keys := newDelegateKeyMap()
 
 	fd.UpdateFunc = func(msg tea.Msg, m *list.Model) tea.Cmd {
-		var title string
+		var name string
 
-		if i, ok := m.SelectedItem().(item); ok {
-			title = i.Title()
+		if i, ok := m.SelectedItem().(FileItem); ok {
+			name = i.Name()
 		} else {
 			return nil
 		}
@@ -67,7 +67,7 @@ func NewFileDelegate() FileDelegate {
 		case tea.KeyMsg:
 			switch {
 			case key.Matches(msg, keys.choose):
-				return m.NewStatusMessage(statusMessageStyle("You chose " + title))
+				return m.NewStatusMessage(statusMessageStyle("You chose " + name))
 
 			case key.Matches(msg, keys.remove):
 				index := m.Index()
@@ -75,7 +75,7 @@ func NewFileDelegate() FileDelegate {
 				if len(m.Items()) == 0 {
 					keys.remove.SetEnabled(false)
 				}
-				return m.NewStatusMessage(statusMessageStyle("Deleted " + title))
+				return m.NewStatusMessage(statusMessageStyle("Deleted " + name))
 			}
 		}
 
@@ -130,14 +130,21 @@ func (fd FileDelegate) Update(msg tea.Msg, m *list.Model) tea.Cmd {
 // Render prints an item.
 func (d FileDelegate) Render(w io.Writer, m list.Model, index int, item list.Item) {
 	var (
-		title, desc  string
+		// name, size, symLinkTarget string
+		// isDir, isSymLink          bool
+		name, size   string
+		isDir        bool
 		matchedRunes []int
 		s            = &d.Styles
 	)
 
-	if i, ok := item.(list.DefaultItem); ok {
-		title = i.Title()
-		desc = i.Description()
+	// Type check
+	if i, ok := item.(FileItem); ok {
+		name = formatFileName(i.Name(), isDir)
+		size = i.Size().String()
+		isDir = i.IsDir()
+		// isSymLink = i.IsSymLink()
+		// symLinkTarget = i.SymLinkTarget()
 	} else {
 		return
 	}
@@ -147,9 +154,12 @@ func (d FileDelegate) Render(w io.Writer, m list.Model, index int, item list.Ite
 		return
 	}
 
+	// Need to somehow define width
+	// width := 30
+
 	// Prevent text from exceeding list width
-	textwidth := uint(m.Width() - s.NormalTitle.GetPaddingLeft() - s.NormalTitle.GetPaddingRight())
-	title = truncate.StringWithTail(title, textwidth, ellipsis)
+	textwidth := uint(m.Width() - s.NormalName.GetPaddingLeft() - s.NormalName.GetPaddingRight())
+	name = truncate.StringWithTail(name, textwidth, ellipsis)
 	// if d.ShowDescription {
 	// 	var lines []string
 	// 	for i, line := range strings.Split(desc, "\n") {
@@ -175,31 +185,32 @@ func (d FileDelegate) Render(w io.Writer, m list.Model, index int, item list.Ite
 
 	if emptyFilter {
 		// BRANCH -> filtering but none applied yet
-		title = s.DimmedTitle.Render(title)
-		desc = s.DimmedDesc.Render(desc)
+		name = s.DimmedName.Render(name)
+		size = s.DimmedSize.Render(size)
 	} else if isSelected && m.FilterState() != list.Filtering {
 		// BRANCH -> selected but not actively filtering (can be filtered already!)
 		if isFiltered {
 			// Highlight matches
-			unmatched := s.SelectedTitle.Inline(true)
+			unmatched := s.SelectedName.Inline(true)
 			matched := unmatched.Copy().Inherit(s.FilterMatch)
-			title = lipgloss.StyleRunes(title, matchedRunes, matched, unmatched)
+			name = lipgloss.StyleRunes(name, matchedRunes, matched, unmatched)
 		}
-		title = s.SelectedTitle.Render(title)
-		desc = s.SelectedDesc.Render(desc)
+		name = s.SelectedName.Render(name)
+		size = s.SelectedSize.Render(size)
 	} else {
 		// BRANCH -> not selected, any other state
 		if isFiltered {
 			// Highlight matches
-			unmatched := s.NormalTitle.Inline(true)
+			unmatched := s.NormalName.Inline(true)
 			matched := unmatched.Copy().Inherit(s.FilterMatch)
-			title = lipgloss.StyleRunes(title, matchedRunes, matched, unmatched)
+			name = lipgloss.StyleRunes(name, matchedRunes, matched, unmatched)
 		}
-		title = s.NormalTitle.Render(title)
-		desc = s.NormalDesc.Render(desc)
+		name = s.NormalName.Render(name)
+		size = s.NormalSize.Render(size)
 	}
 
-	fmt.Fprintf(w, "%s  %s", title, desc)
+	fmt.Fprintf(w, "%s %s", name, size)
+	// fmt.Printf(formatFile(name, size, isDir, isSymLink, symLinkTarget, width))
 }
 
 // ShortHelp returns the delegate's short help.

@@ -6,6 +6,7 @@ require (
 	github.com/charmbracelet/bubbles v0.13.0 // indirect
 	github.com/charmbracelet/bubbletea v0.22.0 // indirect
 	github.com/charmbracelet/lipgloss v0.5.0 // indirect
+	github.com/fogleman/ease v0.0.0-20170301025033-8da417bf1776 // indirect
 	github.com/gdamore/tcell/v2 v2.4.0
 	github.com/google/goterm v0.0.0-20190703233501-fc88cf888a3f // indirect
 	github.com/mattn/go-runewidth v0.0.13

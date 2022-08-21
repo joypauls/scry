@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"log"
 	"os"
+	fp "path/filepath"
 	"time"
 )
 
@@ -42,15 +43,16 @@ func (b BytesSI) String() string {
 
 // Should use custom enum to restrict supported file types
 // Implements os.DirEntry
-// SHould think about the cost/benefit of reimplimenting DirEntry methods vs just composing?
+// Should think about the cost/benefit of reimplimenting DirEntry methods vs just composing?
 type File struct {
-	Name      string
-	Size      BytesSI
-	IsDir     bool
-	IsReg     bool
-	IsSymLink bool
-	Time      time.Time
-	Perm      fs.FileMode
+	name          string
+	size          BytesSI
+	isDir         bool
+	isReg         bool
+	isSymLink     bool
+	symLinkTarget string
+	time          time.Time
+	perm          fs.FileMode
 }
 
 // // Needed to implement os.DirEntry
@@ -58,19 +60,56 @@ type File struct {
 // 	return f.Name
 // }
 
-func MakeFile(d os.DirEntry) File {
+func (f File) Name() string {
+	return f.name
+}
+
+func (f File) Size() BytesSI {
+	return f.size
+}
+
+func (f File) IsDir() bool {
+	return f.isDir
+}
+
+func (f File) IsSymLink() bool {
+	return f.isSymLink
+}
+
+func (f File) SymLinkTarget() string {
+	return f.symLinkTarget
+}
+
+func (f File) Time() time.Time {
+	return f.time
+}
+
+func (f File) Perm() fs.FileMode {
+	return f.perm
+}
+
+func MakeFile(d os.DirEntry, p *Path) File {
 	var f File
-	f.Name = d.Name()
-	f.IsDir = d.IsDir()
+	f.name = d.Name()
+	f.isDir = d.IsDir()
 	fi, err := d.Info() // FileInfo
 	if err != nil {
 		log.Fatal(err)
 	}
 	// fi.Size() is always an int64 but converting to float for math reasons
-	f.Size = BytesSI(float64(fi.Size()))
-	f.Time = fi.ModTime()
-	f.Perm = fi.Mode().Perm()
-	f.IsReg = fi.Mode().IsRegular()
-	f.IsSymLink = fi.Mode()&os.ModeSymlink != 0
+	f.size = BytesSI(float64(fi.Size()))
+	f.time = fi.ModTime()
+	f.perm = fi.Mode().Perm()
+	f.isReg = fi.Mode().IsRegular()
+	f.isSymLink = fi.Mode()&os.ModeSymlink != 0
+
+	if f.isSymLink {
+		target, err := os.Readlink(fp.Join(p.String(), f.name))
+		if err != nil {
+			target = "?"
+		}
+		f.symLinkTarget = target
+	}
+
 	return f
 }

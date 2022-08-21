@@ -10,9 +10,10 @@ import (
 type model struct {
 	list      list.Model
 	directory *fst.Directory
+	path      *fst.Path
 }
 
-// need to define this
+// need to define this for interface
 func (m model) Init() tea.Cmd {
 	return tea.EnterAltScreen
 }
@@ -30,7 +31,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.list.SetSize(msg.Width-h, msg.Height-v)
 	}
 
-	// Updating loop
+	// Update component(s)
 	var cmd tea.Cmd
 	m.list, cmd = m.list.Update(msg)
 	return m, cmd
@@ -44,25 +45,27 @@ func (m model) View() string {
 func newModel() model {
 
 	// Read current directory as a test
-	path := fst.NewPath("")
-	d := fst.NewDirectory(path, false)
+	p := fst.NewPath("")
+	d := fst.NewDirectory(p, false)
 
-	var numItems = d.Size()
-	// elements need to implement Item interface here
-	items := make([]list.Item, numItems)
-	for i := 0; i < numItems; i++ {
-		items[i] = MakeItem(d.File(i))
+	// Elements need to implement Item interface here
+	listItems := make([]list.Item, d.Size())
+	for i := 0; i < d.Size(); i++ {
+		listItems[i] = MakeFileItem(d.File(i))
 	}
 
 	// Create and style list
-	delegate := NewFileDelegate()
-	// delegate := list.NewDefaultDelegate()
-	fileList := list.New(items, delegate, 0, 0)
-	fileList.Title = "Files"
-	fileList.Styles.Title = titleStyle
+	fd := NewFileDelegate()
+	files := list.New(listItems, fd, 0, 0)
+	files.Title = formatHeader(p, 50)
+	// files.Title = "Files"
+	files.Styles.Title = titleStyle
+	files.DisableQuitKeybindings() // handle quit in Update()
+	files.SetWidth(50)
 
 	return model{
-		list:      fileList,
+		list:      files,
 		directory: d,
+		path:      p,
 	}
 }
